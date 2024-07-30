@@ -1,4 +1,5 @@
 import {
+  Alert,
   Dimensions,
   Modal,
   StyleSheet,
@@ -10,33 +11,45 @@ import {
 import React, {useEffect, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {AddYarnCompany, AddYarnData} from '../Slice/YarnSlice';
+import {wp} from '../Global_Com/responsiveScreen';
+import {styleText} from '../assets/fonts/Fonts';
+import {
+  Black,
+  Grey_Button_Color,
+  Transparent,
+  White,
+  Yellow,
+} from '../Global_Com/color';
+import Activity_Indicator from './Activity_Indicator';
+import { DecimalNum } from '../Utils/Regex';
 const {height, width} = Dimensions.get('window');
 const Add_Modal = ({visible, setValue, modal_Type}) => {
   const dispatch = useDispatch();
   const [input1, setInput1] = useState();
   const [input2, setInput2] = useState();
-    const [isDisable,setIsDisable]=useState(true)
-
-    useEffect(()=>{
-        Disable()
-    },[input1,input2])
-    const Disable=()=>{
-      if(modal_Type=="Yarn"){
-        if(input1 && input2){
-            setIsDisable(false)
-        }else{
-            setIsDisable(true)
-        }
-      }else{
-          if(input1){
-            setIsDisable(false)
-        }else{
-            setIsDisable(true)
-        }
-          } 
-
+  const [isDisable, setIsDisable] = useState(true);
+  const [loading,setLoading]=useState(false)
+  useEffect(() => {
+    Disable();
+  }, [input1, input2]);
+  const Disable = () => {
+    if (modal_Type == 'Yarn') {
+      if (input1 && input2) {
+        setIsDisable(false);
+      } else {
+        setIsDisable(true);
+      }
+    } else {
+      if (input1) {
+        setIsDisable(false);
+      } else {
+        setIsDisable(true);
+      }
     }
+  };
   const HandlePress = () => {
+    setIsDisable(true)
+    setLoading(true)
     if (modal_Type == 'Yarn') {
       dispatch(
         AddYarnData({
@@ -44,10 +57,16 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
           rate: input2,
         }),
       ).then(a => {
-        if (a.meta.requestStatus == 'fulfilled') {
+        if (a.payload.error === false) {
+          setIsDisable(false)
+          setLoading(false)
           setInput1(null);
           setInput2(null);
           setValue(false);
+        }else{
+          setIsDisable(false)
+          setLoading(false)
+          Alert.alert(a.payload.message)
         }
       });
     } else {
@@ -56,41 +75,57 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
           name: input1,
         }),
       ).then(a => {
-        if (a.meta.requestStatus == 'fulfilled') {
+        if (a.payload.error === false) {
+          setIsDisable(false)
+          setLoading(false)
           setInput1(null);
           setInput2(null);
           setValue(false);
+        }else{
+          setIsDisable(false)
+          setLoading(false)
         }
       });
     }
   };
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
-      <View
-        style={styles.backgroundColor}>
-        <View
-          style={styles.View}>
+      <View style={styles.backgroundColor}>
+      {
+        loading ? <Activity_Indicator/> : null
+      }
+        <View style={styles.View}>
           <View>
-            <Text
-              style={styles.text}>
+            <Text style={styles.text}>
               {modal_Type == 'Yarn' ? 'Enter Yarn Name' : 'Enter Company Name'}
             </Text>
             <TextInput
               value={input1}
-              onChangeText={e => setInput1(e)}
+              onChangeText={e => {
+                let newName = e; // don't use trim() here
+                if (newName.charAt(0) === ' ') {
+                  // if the first character is a space, remove it
+                  newName = newName.substring(1);
+                }
+                if (newName.length > 1) {
+                  // if the input string has more than one character
+                  newName = newName.replace(/\s{2,}/g, ' '); // replace 2 or more spaces with a single space
+                }
+                setInput1(newName);
+              }}
               style={styles.textInput}
               placeholder={
                 modal_Type == 'Yarn' ? 'Enter Yarn Name' : 'Enter Company Name'
               }></TextInput>
             {modal_Type == 'Yarn' ? (
               <View>
-                <Text
-                  style={styles.text}>
-                  Enter Yarn Rate
-                </Text>
+                <Text style={styles.text}>Enter Yarn Rate</Text>
                 <TextInput
+                  keyboardType="number-pad"
                   value={input2}
-                  onChangeText={e => setInput2(e)}
+                  onChangeText={e => {
+                    if (e === '' || DecimalNum.test(e)) setInput2(e)
+                    }}
                   style={styles.textInput}
                   placeholder="Enter Yarn Rate"></TextInput>
               </View>
@@ -103,20 +138,27 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
               marginTop: '4%',
             }}>
             <TouchableOpacity
-              onPress={() => setValue(false)}
+              onPress={() => {
+                setValue(false);
+                setInput1(null);
+                setInput2(null);
+              }}
               style={{
                 borderWidth: 0,
                 height: height / 15,
                 width: width / 2.5,
                 borderRadius: 10,
-                backgroundColor: '#EAEAEA',
+                backgroundColor: Grey_Button_Color,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text style={{color: '#2D303D', fontSize: 17}}>Cancel</Text>
+              <Text
+                style={{color: Black, fontSize: wp(4.5), ...styleText.medium}}>
+                Cancel
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
-            disabled={isDisable}
+              disabled={isDisable}
               onPress={HandlePress}
               style={{
                 borderWidth: 0,
@@ -126,9 +168,13 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginLeft: '3%',
-                backgroundColor: isDisable ? 'rgba(239, 164, 74, 0.6)' :'#EFA44A',
+                opacity: isDisable ? 0.5 : 1,
+                backgroundColor: Yellow,
               }}>
-              <Text style={{color: 'white', fontSize: 17}}>Add</Text>
+              <Text
+                style={{color: White, fontSize: wp(4.5), ...styleText.medium}}>
+                Add
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -140,31 +186,32 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
 export default Add_Modal;
 
 const styles = StyleSheet.create({
-  textInput:{
+  textInput: {
     borderWidth: 1,
     height: height / 20,
     borderRadius: 10,
     borderColor: 'rgba(217, 217, 217, 1)',
     paddingLeft: '8%',
   },
-  text:{
+  text: {
     marginLeft: '4%',
-    fontSize: 15,
-    color: '#2D303D',
+    fontSize: wp(4),
+    color: Black,
     marginVertical: '2%',
+    ...styleText.medium,
   },
-  backgroundColor:{
+  backgroundColor: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Transparent,
   },
-  View:{
+  View: {
     width: width / 1.1,
     padding: '3%',
     borderRadius: 10,
     borderWidth: 0,
     flexDirection: 'column',
-    backgroundColor: 'white',
-  }
+    backgroundColor: White,
+  },
 });

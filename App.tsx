@@ -8,6 +8,7 @@
 import React, { useEffect } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
+  LogBox,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -24,43 +25,30 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import SplashScreen from 'react-native-splash-screen';
-import LoginStack from './src/Navigation/loginStack';
-import { Provider } from 'react-redux';
-import Store from './src/store/store';
-import Demo from './Demo';
-import Request from './src/screens/Request';
 
+import LoginStack from './src/Navigation/loginStack';
+import { Provider, useDispatch } from 'react-redux';
+import Store from './src/store/store';
+import SplashScreen from 'react-native-splash-screen';
+import Demo from './Demo';
+import BootSplash from "react-native-bootsplash";
 function App(): React.JSX.Element {
+
   useEffect(()=>{
-      SplashScreen.hide()
+      setTimeout(()=>{
+        BootSplash.hide();
+      },5000)
+    LogBox.ignoreAllLogs();
   }, [])
 
   return (
     <Provider store={Store}>
     <LoginStack/>
     </Provider>
+    // <View style={{flex:1,backgroundColor:"red"}}>
+    // </View>
     // <Demo/>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;

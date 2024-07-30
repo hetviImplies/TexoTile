@@ -1,7 +1,12 @@
 import React, {forwardRef, useRef, useState, useImperativeHandle} from 'react';
 import {View, Animated, Text, StatusBar, StyleSheet, Dimensions} from 'react-native';
-import Error from './src/assets/svgs/Error';
-import Success from './src/assets/svgs/Success';
+
+
+import { Black, Green, Red, White } from './src/Global_Com/color';
+import { styleText } from './src/assets/fonts/Fonts';
+import { hp, wp } from './src/Global_Com/responsiveScreen';
+import { Error, Success } from './src/assets/svgs/svg';
+const {height,width}=Dimensions.get("window")
 const Toast = forwardRef((props, ref) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
     const [modalShown, setModalShown] = useState(false);
@@ -64,11 +69,11 @@ const Toast = forwardRef((props, ref) => {
         let color;
         let textColorValue;
         if (type == 'error') {
-            color = '#D2424D';
+            color = Red;
             textColorValue = 'white';
         }
         if (type == 'success') {
-            color = 'green';
+            color = Green;
             textColorValue = 'white';
         }
         setMessage(message);
@@ -78,13 +83,13 @@ const Toast = forwardRef((props, ref) => {
 
     return modalShown ? (
         <Animated.View style={[styles.container, {backgroundColor: toastColor,marginTop: -StatusBar.currentHeight - height, transform: [{translateY: animation}]}]}>
-        <View style={{flexDirection:"row"}}>
+        <View style={{flexDirection:"row",alignItems:"center"}}>
                 { type==='error' ?
-                <Error/> : <Success/>
+                <Error fill={White} height={hp(3.5)} width={hp(3.5)}/> : <Success fill={White} height={hp(3.5)} width={hp(3.5)}/>
                 }
                 <View style={styles.row}>
-                <Text style={[styles.message, {color: textColor,fontSize: 20}]}>{type==='error' ? 'Error!' : 'Success'}</Text>
-                <Text style={[styles.message, {color: textColor,fontSize: 14}]}>{message}</Text>
+                <Text style={[styles.message, {color: textColor,fontSize: 21,paddingTop:"2%",...styleText.regular}]}>{type==='error' ? 'Error !' : 'Success'}</Text>
+                <Text style={[styles.message, {color: textColor,fontSize: 16,...styleText.semiBold,marginTop:"1%"}]}>{message}</Text>
             </View>
             </View>
         </Animated.View>
@@ -96,15 +101,14 @@ export const styles = StyleSheet.create({
         position: "absolute",
     top: 0,
     minHeight: 80,
-    width: '100%',
+    width: wp(100),
     zIndex: 1000,
     justifyContent: 'flex-end',
     padding: 14,
     elevation: 100,
-    
     },
     message: {
-        color: 'black',
+        color: Black,
         fontWeight: 'bold',
         marginHorizontal: 10,
         lineHeight: 18,

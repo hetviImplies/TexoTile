@@ -1,160 +1,233 @@
-import {Dimensions, Keyboard, StyleSheet, Text, TextInput, View} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import {
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import LogoComponent from '../component/LogoComponent';
 import TextComponent from '../component/TextComponent';
-import Message from '../assets/svgs/Message';
-import Profile from '../assets/svgs/Profile';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ButtonPress from '../component/ButtonPress';
 import Backhandler from '../component/BackHandler';
 import {useDispatch} from 'react-redux';
 import {UpdateUserAuth} from '../Slice/LoginAuthSlice';
-import { EndPoints } from '../URLs/EndPoints';
-import { URL } from '../URLs/URL';
-import { styleText } from '../assets/fonts/Fonts';
-const WelcomeScreen = ({navigation}) => {
+import {EndPoints} from '../URLs/EndPoints';
+import {URL} from '../URLs/URL';
+import {styleText} from '../assets/fonts/Fonts';
+import FlashMessage, {showMessage} from 'react-native-flash-message';
+import {Email, Profile_Black} from '../assets/svgs/svg';
+import {hp} from '../Global_Com/responsiveScreen';
+import {Black, Cream_White, Red, White, Yellow} from '../Global_Com/color';
+import screens from '../constants/screens';
+import AppConstant from '../Utils/AppConstant';
+import Toast from '../../Toast';
+import {GlobalStyles} from '../Global_Com/Style';
+import {emailRegex} from '../Utils/Regex';
+import Activity_Indicator from '../component/Activity_Indicator';
+
+const UpdateUser = ({navigation}) => {
   const {height, width} = Dimensions.get('window');
   const [name, setName] = useState();
-  const [email, setEmail] = useState();
+  const [email, setEmail] = useState('');
   const [error, setError] = useState();
   const [EmailError, setEmailError] = useState();
   const dispatch = useDispatch();
+  const toastRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  let input1 = useRef(null);
+  let input2 = useRef(null);
+
 
   useEffect(() => {
-    Backhandler();
-  }, []);
-  console.log(error);
-
-  useEffect(() => {
-    ValidationForName()
-  }, [name])
-
+    ValidationForName();
+  }, [name]);
 
   const ValidationForName = () => {
-    if(name == undefined){
-      console.log('email: ', email);
-      setError(false)
-    }else{
-      const nm = /^[a-zA-Z0-9._]{2,20}$/.test(name);
-    setError(!nm)
+    if (name == undefined) {
+      setError(false);
+    } else {
+      const nm = /^[a-zA-Z0-9\s]+$/.test(name);
+      setError(!nm);
     }
-  }
+  };
 
   useEffect(() => {
-    const emailRegex = /^(?:[\w\.-]+)?@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
-    if(email == undefined){
-      console.log('email: ', email);
-      setEmailError(false)
-    }else{
+    if (email == '') {
+      setEmailError(false);
+    } else {
       const isValidEmail = emailRegex.test(email);
       setEmailError(!isValidEmail);
-      console.log('isValidEmail: ', isValidEmail);
     }
   }, [email]);
 
+  const handleError = useCallback(
+    message => {
+      toastRef.current.error(message);
+      toastRef.current.Height(-StatusBar.currentHeight);
+    },
+    [toastRef],
+  );
+
   const HandlePress = async () => {
     Keyboard.dismiss();
-    console.log('EmailError: ', EmailError);
-    console.log('email: ',typeof email);
-    if (!error && name && (email==undefined || (EmailError==false && email) || (email=='' && EmailError))) {
-
-      console.log('EmailError: ', EmailError);
-
-      await fetch(`${URL}${EndPoints.UpdateUserAPI}`, {
-        method: 'PUT',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          'name': name.toString(),
-          'email': email==undefined ? '' : email.toString(),
-        }),
-      })
-        .then(response => {
-          return response.json();
-        })
-        .then(async data => {
-          console.log('Response data:', data, '======');
-          if (!data.error) {
-            await AsyncStorage.setItem('name', name);
-            return navigation.navigate('Category');
-          }
-        })
-        .catch(error => {
-          console.error('Error:', error);
+    if (
+      !error &&
+      name &&
+      (email == '' ||
+        (EmailError == false && email) ||
+        (email == '' && EmailError))
+    ) {
+      console.log('loading', loading);
+      setLoading(true);
+      try {
+        let newName = name.replace(/\s+/g, ' ');
+        let newEmail = email.replace(/\s+/g, '');
+        if(newName!==' '){
+        const obj = JSON.stringify({
+          name: newName.toString().trim(),
+          email: newEmail == '' ? '' : newEmail.toString().trim(),
         });
+        await dispatch(UpdateUserAuth(obj))
+          .then(async data => {
+            if (!data.payload.error) {
+              setLoading(false);
+              await AsyncStorage.setItem('name', name);
+              return navigation.reset({
+                index: 0,
+                routes: [{name: screens.Preference}],
+              });
+            } else {
+              setLoading(false);
+              handleError(data.payload.message);
+            }
+          })
+          .catch(error => {
+            setLoading(false);
+            handleError(error.message);
+          });}else{
+            setLoading(false)
+            setError(true)
+          }
+      } catch (error) {
+        setLoading(false);
+        handleError(error.message);
+      }
     } else {
-      ValidationForName()
-      if(name==undefined){
-      setError(true)
-    }
+      setLoading(false);
+      ValidationForName();
+      if (name == undefined) {
+        setError(true);
+      }
     }
   };
   return (
-    <View style={{backgroundColor: 'white',flex:1}}>
+    <View
+      style={GlobalStyles.ContainerWithoutJustifty}>
+      <Toast ref={toastRef} />
+      {loading ? <Activity_Indicator /> : null}
       <LogoComponent />
       <View style={{margin: '5%'}}>
-        <TextComponent main="Welcome back" sub="Please enter your details." />
-        <View style={{marginTop: '10%'}}>
+        <TextComponent
+          main={AppConstant.Welcome_back}
+          sub="Please enter your details."
+        />
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            marginTop: hp(1),
+            borderWidth: 0,
+            height: hp(70),
+          }}>
           <View
-            style={[styles.textInput_View,{borderColor:error ? "red" : "#FAFAFA"}]}>
-            <Profile stroke={'black'} />
+            style={[
+              styles.textInput_View,
+              {borderColor: error ? Red : Cream_White},
+            ]}>
+            <Profile_Black />
             <TextInput
-            cursorColor={"#E89E46"}
+              selectionColor={Yellow}
+              returnKeyLabel="next"
+              ref={i => (input1 = i)}
+              onSubmitEditing={() => input2.focus()}
+              cursorColor={'#E89E46'}
               placeholder="Enter Name"
               value={name}
-              onChangeText={e => setName(e)}
+              onChangeText={e => {
+                let newName = e; // don't use trim() here
+                  if (newName.charAt(0) === ' ') {
+                    // if the first character is a space, remove it
+                    newName = newName.substring(1);
+                  }
+                  if (newName.length > 1) {
+                    // if the input string has more than one character
+                    newName = newName.replace(/\s{2,}/g, ' '); // replace 2 or more spaces with a single space
+                  }
+                setName(newName)
+                }}
               style={styles.textInput}></TextInput>
           </View>
           {error ? (
-          <Text style={styles.error_Text}>
-            Username is required
-          </Text>
-        ) : null}
+            <Text style={styles.error_Text}>Username is required</Text>
+          ) : null}
           <View
-            style={[styles.textInput_View,{borderColor:EmailError ? "red" : "#FAFAFA"}]}>
-            <Message />
+            style={[
+              styles.textInput_View,
+              {borderColor: EmailError ? Red : Cream_White},
+            ]}>
+            <Email height={22} width={22} />
             <TextInput
-
+              selectionColor={Yellow}
+              ref={i => (input2 = i)}
+              returnKeyLabel="done"
               placeholder="Enter Email (optional)"
               value={email}
-              onChangeText={e => setEmail(e)}
+              onChangeText={e => {
+                let email = e.replace(/\s+/g, '')
+                setEmail(email)
+                }}
               style={styles.textInput}></TextInput>
           </View>
           {EmailError ? (
-          <Text style={styles.error_Text}>
-            Invalid email
-          </Text>
-        ) : null}
-        </View>
-
+            <Text style={styles.error_Text}>Invalid email</Text>
+          ) : null}
+        </ScrollView>
       </View>
-      <ButtonPress title="Done" func={HandlePress} />
+      <ButtonPress
+        isDisable={loading}
+        title={AppConstant.Done}
+        func={HandlePress}
+      />
     </View>
   );
 };
 
-export default WelcomeScreen;
+export default UpdateUser;
 
 const styles = StyleSheet.create({
-  textInput_View:{
+  textInput_View: {
     width: '100%',
     marginTop: '5%',
     borderWidth: 1,
     height: 52,
     borderRadius: 15,
-    backgroundColor: '#FAFAFA',
+    backgroundColor: Cream_White,
     alignItems: 'center',
     paddingLeft: '7%',
     flexDirection: 'row',
   },
-  textInput:{
-    color: 'black',
-    fontSize: 14,...styleText.semiBold,
+  textInput: {
+    color: Black,
+    fontSize: hp(1.8),
+    ...styleText.semiBold,
     marginLeft: '5%',
-    borderWidth:0,
-    flexGrow:1
+    borderWidth: 0,
+    flexGrow: 1,
   },
-  error_Text:{color: 'red', alignSelf: 'flex-end',...styleText.semiBold}
+  error_Text: {color: Red, alignSelf: 'flex-end', ...styleText.semiBold},
 });

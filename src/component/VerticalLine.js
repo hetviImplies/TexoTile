@@ -1,12 +1,14 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
+import { Black } from '../Global_Com/color';
 
 const VerticalLine = () => {
   return (
     <View
       style={{
-        borderColor: 'rgba(45, 48, 61, 0.1)',
-        borderWidth: 1,
+        borderColor: Black,
+        opacity:0.1,
+        borderRightWidth:1,
         marginHorizontal: 2,
       }}></View>
   );

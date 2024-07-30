@@ -6,20 +6,19 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import User from '../assets/svgs/User';
-import Right_arrow from '../assets/svgs/Right_arrow';
-import Company from '../assets/svgs/Company';
-import LogOut from '../assets/svgs/LogOut';
-
+import { styleText } from '../assets/fonts/Fonts';
+import { InfoError, Right_arrow, SignOut, UserLogo } from '../assets/svgs/svg';
+import { hp, wp } from '../Global_Com/responsiveScreen';
+import { Black, White } from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');
 const Setting_com = ({title, func}) => {
   const Logo = () => {
     if (title == 'Account') {
-      return <User />;
+      return <UserLogo height={hp(2.3)} width={hp(2.3)}/>;
     } else if (title == 'Company Information') {
-      return <Company />;
+      return <InfoError height={hp(2.3)} width={hp(2.3)} />;
     } else if (title == 'Logout') {
-      return <LogOut />;
+      return <SignOut height={hp(2.3)} width={hp(2.3)}/>;
     }
   };
 
@@ -37,10 +36,11 @@ const Setting_com = ({title, func}) => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           marginHorizontal: '4%',
+          alignItems:"center"
         }}>
-        <View style={{flexDirection: 'row', width: width / 2}}>
-          <View style={{marginRight: '5%'}}>{Logo()}</View>
-          <Text style={{color: '#2D303D', fontSize: 14}}>{title}</Text>
+        <View style={{flexDirection: 'row', width: wp(50)}}>
+          <View style={{marginRight: '5%',marginTop:"1%"}}>{Logo()}</View>
+          <Text style={{color: Black, fontSize: hp(2),...styleText.medium}}>{title}</Text>
         </View>
         <View>{RighArrow()}</View>
       </View>
@@ -54,12 +54,12 @@ const styles = StyleSheet.create({
     btn:{
         borderWidth: 0,
         marginTop: '4%',
-        height: height / 16,
-        width: width / 1.1,
+        height: hp(7),
+        width: wp(90),
         borderRadius: 10,
-        backgroundColor: 'white',
+        backgroundColor: White,
         shadowColor: '#000',
-        backgroundColor: 'white',
+        backgroundColor: White,
         shadowOffset: {width: 0, height: 1},
         shadowOpacity: 0.8,
         shadowRadius: 1,

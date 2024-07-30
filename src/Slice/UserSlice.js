@@ -4,6 +4,7 @@ import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {URL} from '../URLs/URL';
 import {EndPoints} from '../URLs/EndPoints';
+import {GetCurrentUserAPI, GetPendignRequestAPI, ProceedCurrentRequestAPI, ProceedPendingRequestAPI, RemoveCurrentRequestAPI, RemovePendingRequestAPI} from '../services/UserRequestAPI';
 const initialState = {
   PendignRequest: null,
   OldPendignRequest: null,
@@ -15,101 +16,50 @@ const initialState = {
 export const GetPendignRequest = createAsyncThunk(
   'Get Pendign Request',
   async () => {
-    try {
-      const res = await axios.get(`${URL}${EndPoints.GetPendignRequest}`);
-      // console.log('res.data.payload: ', res.data.result);
-      return res.data.result;
-    } catch (error) {
-      console.log('error: ', error);
-    }
+    const res = await GetPendignRequestAPI();
+    return res;
   },
 );
 
 export const GetCurrentUser = createAsyncThunk(
   'Get Current Users',
   async () => {
-    try {
-      const res = await axios.get(`${URL}${EndPoints.GetCurrentUser}`);
-      return res.data.result;
-    } catch (error) {
-      console.log('error: ', error);
-    }
+      const res = await GetCurrentUserAPI();
+      return res;
+  }
+);
+
+export const RemovePendingRequest = createAsyncThunk(
+  'Remove Pending Request',
+  async id => {
+      const res = await RemovePendingRequestAPI(id)
+      return res
   },
 );
 
-export const RemovePendingRequest = createAsyncThunk('Remove Pending Request', async (id) => {
-  try {
-    const res = await fetch(`${URL}${EndPoints.ProceedRequest}/${id}/D`,{
-      headers : {
-        Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      method : "POST"
-    }).then((a)=>{
-      return a.json()
-    })
-    return res
-  } catch (error) {
-    console.log('error: ', error);
-  }
-});
+export const RemoveCurrentRequest = createAsyncThunk(
+  'Remove Current Request',
+  async id => {
+      const res = await RemoveCurrentRequestAPI(id)
+      return res;
+  },
+);
 
-export const RemoveCurrentRequest = createAsyncThunk('Remove Current Request', async (id) => {
-  try {
-    console.log(id, '=====1');
-    const res = await fetch(`${URL}${EndPoints.RemoveRequest}/${id}`,{
-      headers : {
-        Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      method : "POST"
-    }).then((a)=>{
-      return a.json()
-    })
-    return res
-  } catch (error) {
-    console.log('error: ', error);
+export const ProceedPendingRequest = createAsyncThunk(
+  'Proceed Pending Request',
+  async obj => {
+      const res = await ProceedPendingRequestAPI(obj);
+      return res;
   }
-});
+);
 
-export const ProceedPendingRequest = createAsyncThunk('Proceed Pending Request', async (obj) => {
-  const {id,data}=JSON.parse(obj)
-  try {
-    const res = await fetch(`${URL}${EndPoints.ProceedRequest}/${id}/A`,{
-      headers : {
-        Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      method : "POST",
-      body : JSON.stringify(data)
-    }).then((a)=>{
-      return a.json()
-    })
-    return res
-  } catch (error) {
-    console.log('error: ', error);
-  }
-});
-
-export const ProceedCurrentRequest = createAsyncThunk('Proceed Current Request', async (obj) => {
-  const {id,data}=JSON.parse(obj)
-  console.log( id,data);
-  try {
-    const res = await fetch(`${URL}${EndPoints.UpdateCurrentUser}/${id}`,{
-      headers : {
-        Accept: 'application/json',
-      'Content-Type': 'application/json',
-      },
-      method : "PUT",
-      body : JSON.stringify(data)
-    }).then((a)=>{
-      return a.json()
-    })
-    return res
-  } catch (error) {
-    console.log('error: ', error);
-  }
-});
+export const ProceedCurrentRequest = createAsyncThunk(
+  'Proceed Current Request',
+  async obj => {
+    const res = await ProceedCurrentRequestAPI(obj);
+      return res;
+  },
+);
 
 const UserSlice = createSlice({
   name: 'User',
@@ -117,23 +67,23 @@ const UserSlice = createSlice({
   reducers: {
     SearchPendingData: (state, action) => {
       const dt = state.PendignRequest;
-      const search = action.payload?.trim().toLowerCase();
+      const search = action.payload?.trim()?.toLowerCase();
       if (search === '') {
         state.PendignRequest = state.OldPendignRequest;
       } else {
-        const data = dt?.filter(v =>
-          v.user.name?.toLowerCase().includes(search),
+        const data = state.OldPendignRequest?.filter(v =>
+          v.user.name?.toLowerCase().includes(search?.toLowerCase()),
         );
         state.PendignRequest = data;
       }
     },
     SearchCurrentData: (state, action) => {
       const dt = state.CurrentUser;
-      const search = action.payload?.trim().toLowerCase();
+      const search = action.payload?.toLowerCase();
       if (search === '') {
         state.CurrentUser = state.OldCurrentUser;
       } else {
-        const data = dt?.filter(v => v.name?.toLowerCase().includes(search));
+        const data = state.OldCurrentUser?.filter(v => v.name?.toLowerCase().includes(search?.toLowerCase()));
         state.CurrentUser = data;
       }
     },
@@ -150,7 +100,6 @@ const UserSlice = createSlice({
       })
       .addCase(GetPendignRequest.rejected, (state, action) => {
         state.pending = false;
-        console.log('Rejected !!');
       })
       .addCase(GetCurrentUser.fulfilled, (state, action) => {
         state.OldCurrentUser = action.payload;
@@ -162,7 +111,6 @@ const UserSlice = createSlice({
       })
       .addCase(GetCurrentUser.rejected, (state, action) => {
         state.pending = false;
-        console.log('Rejected !!');
       });
   },
 });

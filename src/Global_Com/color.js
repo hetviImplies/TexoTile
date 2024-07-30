@@ -1,0 +1,12 @@
+export const Yellow = "#E89E46"
+export const White = "#FFFFFF"
+export const Black = '#2D303D'
+export const Grey = '#2D303D'
+export const Border_Color = "#565A70"
+export const Red = "#F74850"
+export const Green = "#358C41"
+export const Transparent = "rgba(0,0,0,0.5)"
+export const TextInput_Border_Color = "rgba(45, 48, 61, 0.1)"
+export const Photo_Background_Color = 'rgba(235, 235, 235, 0.3)'
+export const Grey_Button_Color = "#EAEAEA"
+export const Cream_White = "#FAFAFA"

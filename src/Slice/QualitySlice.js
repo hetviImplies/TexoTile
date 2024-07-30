@@ -1,8 +1,7 @@
 import {createSlice, isPending} from '@reduxjs/toolkit';
 import {createAsyncThunk} from '@reduxjs/toolkit';
-import {GetAllQualityAPI} from '../APIs/QualityAPI';
+import {CreateQualityAPI, GetAllQualityAPI, UpdateQualityAPI} from '../services/QualityAPI';
 import axios from 'axios';
-import { URL } from '../URLs/URL';
 import { EndPoints } from '../URLs/EndPoints';
 const initialState = {
   QualityData: null,
@@ -11,49 +10,27 @@ const initialState = {
 };
 
 export const GetQualityData = createAsyncThunk('get quality data', async () => {
-  const response = await axios.get(`${URL}${EndPoints.GetQualityData}`);
-  return response.data.result.data;
+  const response = await GetAllQualityAPI();
+  return response.result.data;
 });
 
 export const CreateQualityData = createAsyncThunk(
   'Create quality data',
   async (obj) => {
-    console.log(obj, '=========res')
     try{
-    const res=fetch(`${URL}${EndPoints.QualityCreate}`,{
-        body:obj,
-        method:"POST",
-        headers:{
-            Accept: 'application/json',
-           'Content-Type': 'application/json'
-        }
-    }).then((a)=>{
-        return a.json()
-    }).then((v)=>{
-        console.log(v,'create');
-    })
+    const res=await CreateQualityAPI(obj)
+    return res
 }catch (error) {
-    console.error( error);
+    throw error
   }}
 );
 
-export const UpdateQualityData = ({ data, id, toastRef }) => async (dispatch) => {
-  try {
-    const res = await fetch(`${URL}${EndPoints.UpdateQualityData}?id=${id}`, {
-      body: JSON.stringify(data),
-      method: 'PUT',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    }).then((a) => {
-      return a.json();
-    });
-     // Call the toastRef success function
+export const UpdateQualityData = ({ data, id }) => async () => {
+  try{
+    const res = await UpdateQualityAPI(data,id)
     return res;
-  } catch (error) {
-    console.error(error);
-    throw error; // Re-throw the error to keep the promise rejected
+  }catch(error){
+    throw error;
   }
 };
 
@@ -62,14 +39,22 @@ const QualitySlice = createSlice({
   initialState,
   reducers: {
     SearchData: (state, action) => {
+      // const dt = state.QualityData;
+      // const search = action.payload?.toLowerCase();
+      // if (search === '') {
+      //   state.QualityData = state.QualityOldDt;
+      // } else {
+      //   const data = dt?.filter(v => v.name?.toLowerCase().includes(search));
+      //   state.QualityData = data
+      // }
       const dt = state.QualityData;
-      const search = action.payload?.trim().toLowerCase();
-      if (search === '') {
-        state.QualityData = state.QualityOldDt;
-      } else {
-        const data = dt?.filter(v => v.name?.toLowerCase().includes(search));
-        state.QualityData = data?.length > 0 ? data : state.QualityOldDt;
-      }
+    const search = action.payload;
+    if (search === '') {
+      state.QualityData = state.QualityOldDt;
+    } else {
+      const data = state.QualityOldDt?.filter(v => v.name?.toLowerCase().includes(search?.toLowerCase()));
+      state.QualityData = data;
+    }
     }
   },
   extraReducers: builder => {
@@ -81,7 +66,6 @@ const QualitySlice = createSlice({
       })
       .addCase(GetQualityData.pending, state => {
         state.QualityPending = true;
-        console.log('state.QualityPending: ', state.QualityPending);
       })
       .addCase(GetQualityData.rejected, state => {
         state.QualityPending = false;

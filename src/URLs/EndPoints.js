@@ -5,7 +5,6 @@ export const EndPoints = {
     OTPAPI : '/user/verifyOtp',
     JoinCompanyAPI : '/company/join' ,
     UpdateUserAPI : '/user/updateUser',
-    UpdateUserAuth : '/user/updateUser',
     GetUser : '/user/profile',
     Logout : '/user/logOut',
     QualityCreate : '/quality/create',

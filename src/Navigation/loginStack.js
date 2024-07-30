@@ -5,69 +5,71 @@ import {
   Text,
   View,
 } from 'react-native';
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {Suspense, useCallback, useEffect, useRef, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createStackNavigator} from '@react-navigation/stack';
 import Login from '../screens/login';
 import VerifyPhone from '../screens/VerifyPhone';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import WelcomeScreen from '../screens/UpdateUser';
-import Category from '../screens/Preference';
+import UpdateUser from '../screens/UpdateUser';
+import Preference from '../screens/Preference';
 import Tabs from './Tabs';
 import Request from '../screens/Request';
 import QualityDetail from '../screens/QualityView';
-import axios from 'axios';
 import UpdateYarn from '../screens/UpdateYarn';
 import Profile_Setting from '../screens/Profile_Setting';
-import {EndPoints} from '../URLs/EndPoints';
-import {URL} from '../URLs/URL';
 import Activity_Indicator from '../component/Activity_Indicator';
+import {styleText} from '../assets/fonts/Fonts';
+import FlashMessage, {showMessage} from 'react-native-flash-message';
+import ImageView from '../screens/ImageView';
+import {Provider, useDispatch, useSelector} from 'react-redux';
+import Store from '../store/store';
+import {ConditionProvider} from '../screens/ConditionContext';
+import {White, Yellow} from '../Global_Com/color';
+import Toast from 'react-native-toast-message';
+import {hp} from '../Global_Com/responsiveScreen';
+import screens from '../constants/screens';
+import {GetUser} from '../Slice/LoginAuthSlice';
+
 const LoginStack = () => {
   const [user, setUser] = useState();
   const [name, setName] = useState();
+  const [role, setRole] = useState();
+  const [loading, setLoading] = useState(true);
   const stack = createStackNavigator();
-
+  const dispatch = useDispatch();
   useEffect(() => {
     Handle();
   }, []);
 
-  useEffect(() => {
-    console.log('Setting initial route:', name);
-  }, [name]);
-
   const Handle = async () => {
     try {
-      const response = await axios
-        .get(`${URL}${EndPoints.GetProfile}`)
-        .then(res => {
-          return res.data.result;
-        })
-        .then(data => {
-          console.log('data: ', data);
-          if (data.mobile_number) {
-            if (data.name) {
-              if (data.role) {
-                setName('Tabs');
-              } else {
-                if (data.company_owner === false && !data.role) {
-                  setName('Request');
-                } else if (data.company_owner === null) {
-                  console.log('Category');
-                  setName('Category');
-                }
-              }
+      await dispatch(GetUser()).then(async data => {
+        setLoading(false);
+        if (data.payload.result.mobile_number) {
+          if (data.payload.result.name) {
+            if (data.payload.result.role) {
+              setName(screens.Tabs);
             } else {
-              console.log('WelcomeScreen');
-              setName('WelcomeScreen');
+              if (
+                data.payload.result.company_owner === false &&
+                !data.payload.result.role
+              ) {
+                setName(screens.Request);
+              } else if (data.payload.result.company_owner === null) {
+                setName(screens.Preference);
+              }
             }
           } else {
-            console.log('Login');
-            setName('Login');
+            setName(screens.UpdateUser);
           }
-        });
+        } else {
+          setName(screens.Login);
+        }
+      });
     } catch (error) {
-      setName('Login');
-      console.log(error);
+      console.error('error1: ', error);
+      setName(screens.Login);
     }
   };
 
@@ -77,57 +79,69 @@ const LoginStack = () => {
 
   return (
     <Suspense fallback={<Activity_Indicator />}>
-      <StatusBar backgroundColor="#E89E46" barStyle="light-content" />
+      <StatusBar backgroundColor={Yellow} barStyle="light-content" />
       <NavigationContainer>
-        {name != undefined ? (
-          <stack.Navigator
-            screenOptions={options}
-            initialRouteName={'QualityDetail'}>
-            <stack.Screen component={Login} name="Login"></stack.Screen>
-            <stack.Screen
-              component={VerifyPhone}
-              name="VerifyPhone"></stack.Screen>
-            <stack.Screen
-              component={WelcomeScreen}
-              name="WelcomeScreen"></stack.Screen>
-            <stack.Screen component={Category} name="Category"></stack.Screen>
-            <stack.Screen component={Tabs} name="Tabs"></stack.Screen>
-            <stack.Screen component={Request} name="Request"></stack.Screen>
-            <stack.Screen
-              component={QualityDetail}
-              name="QualityDetail"
-              initialParams={{data: 100}}
-              options={{
-                headerShown: true,
-                headerTitleAlign: 'center',
-                headerBackgroundContainerStyle: {
-                  backgroundColor: '#E89E46',
-                  zIndex: 0,
-                  overflow: 'hidden',
-                },
-                headerTintColor: 'white',
-                headerBackground: () => {},
-                headerShown: true,
-              }}></stack.Screen>
-            <stack.Screen
-              component={UpdateYarn}
-              name="UpdateYarn"
-              options={{
-                headerShown: true,
-                headerTitleAlign: 'center',
-                headerBackgroundContainerStyle: {
-                  backgroundColor: '#E89E46',
-                },
-                headerTintColor: 'white',
-                headerBackground: () => {},
-              }}></stack.Screen>
-            <stack.Screen
-              component={Profile_Setting}
-              name="Profile_Setting"></stack.Screen>
-          </stack.Navigator>
-        ) : (
-          Handle()
-        )}
+        <ConditionProvider>
+          {name !== undefined ? (
+            <stack.Navigator screenOptions={options} initialRouteName={name}>
+              <stack.Screen
+                component={Login}
+                name={screens.Login}></stack.Screen>
+              <stack.Screen
+                component={ConditionProvider}
+                name={screens.ConditionProvider}></stack.Screen>
+              <stack.Screen
+                component={VerifyPhone}
+                name={screens.VerifyPhone}></stack.Screen>
+              <stack.Screen
+                component={UpdateUser}
+                name={screens.UpdateUser}></stack.Screen>
+              <stack.Screen
+                component={Preference}
+                name={screens.Preference}></stack.Screen>
+              <stack.Screen
+                component={Tabs}
+                name={screens.Tabs}
+                initialParams={{role: role}}></stack.Screen>
+              <stack.Screen
+                component={Request}
+                name={screens.Request}></stack.Screen>
+              <stack.Screen
+                component={QualityDetail}
+                name={screens.QualityDetail}
+                options={{
+                  headerShown: true,
+                }}></stack.Screen>
+              <stack.Screen
+                component={UpdateYarn}
+                name={screens.UpdateYarn}
+                options={{
+                  headerShown: true,
+                  headerTitleAlign: 'center',
+                  headerBackgroundContainerStyle: {
+                    backgroundColor: Yellow,
+                  },
+                  headerTintColor: White,
+                  headerBackground: () => {},
+                }}></stack.Screen>
+              <stack.Screen
+                component={Profile_Setting}
+                options={{
+                  headerBackgroundContainerStyle: {
+                    backgroundColor: Yellow,
+                  },
+                  headerShown: true,
+                  headerBackground: () => {},
+                }}
+                name={screens.Profile_Setting}></stack.Screen>
+              <stack.Screen
+                component={ImageView}
+                name={screens.ImageView}></stack.Screen>
+            </stack.Navigator>
+          ) : (
+            Handle()
+          )}
+        </ConditionProvider>
       </NavigationContainer>
     </Suspense>
   );

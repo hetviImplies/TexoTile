@@ -1,8 +1,12 @@
 import {
+  Alert,
   Button,
   Dimensions,
   KeyboardAvoidingView,
+  Linking,
+  PermissionsAndroid,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,9 +19,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import LeftArrow from '../assets/svgs/LeftArrow';
 import {RadioButton, TextInput} from 'react-native-paper';
-import Save from '../assets/svgs/Save';
 
 import Tag from '../component/Tag';
 import Production_Input from '../component/Production_Input';
@@ -32,19 +34,41 @@ import {
   UpdateQualityData,
 } from '../Slice/QualitySlice';
 import BackModal_Detail from '../component/Back_CardView_Modal';
-import {OnlyNum, RemoveZero, Validation} from '../assets/Regex/Regex';
 import CardView from '../component/CardView';
-import Toast from '../../Toast';
+
 import FlashMessage from 'react-native-flash-message';
+import {showMessage} from 'react-native-flash-message';
 import {styleText} from '../assets/fonts/Fonts';
+import BottomSheet from 'react-native-gesture-bottom-sheet';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+
+import DocumentPicker from 'react-native-document-picker';
+import {Camera, Image, LeftArrow, Pdf, Save} from '../assets/svgs/svg';
+import Toast from '../../Toast';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {
+  Black,
+  Border_Color,
+  Red,
+  TextInput_Border_Color,
+  White,
+  Yellow,
+} from '../Global_Com/color';
+import screens from '../constants/screens';
+import AppConstant from '../Utils/AppConstant';
+import Activity_Indicator from '../component/Activity_Indicator';
+import {Validation_YarnData} from '../Utils/Regex';
 const {height, width} = Dimensions.get('window');
 const QualityDetail = props => {
-  const {data} = props.route.params;
+  const data = props.route.params?.data;
+  console.log('data: ', data);
+  let QualityFormData = new FormData()
+  const [loading, setLoading] = useState(false);
   const [qualityName, setQualityName] = useState('');
   const [value, setValue] = useState('first');
   const [ExpenseCost, setExpenseCost] = useState(0);
   const [Expense_Cost, setExpense_Cost] = useState(0);
-  const [RPM, setRPM] = useState(0);
+  const [RPM, setRPM] = useState('0');
   const [total_Efficiency, setTotal_Efficiency] = useState(0);
   const [efficiency, setEfficiency] = useState(0);
   const [machine, setMachine] = useState('1');
@@ -54,9 +78,13 @@ const QualityDetail = props => {
   const [Width, setWidth] = useState(0);
   const [nozzle, setNozzle] = useState('');
   const [pasramani, setPasramani] = useState('');
+  const [pasramani_Pattern, setPasramani_Pattern] = useState(null);
+  const [sample, setSample] = useState(null);
+  const [pick_Pattern, setPick_Pattern] = useState(null);
   const [steam_warp, setSteam_warp] = useState('');
   const [steam_weft, setSteam_weft] = useState('');
   const [lattice, setLattice] = useState('');
+  const [lattice_Pattern, setLattice_Pattern] = useState(null);
   const [gsm, setGsm] = useState('');
   const [warpShow, setWarpShow] = useState(false);
   const [weftShow, setWeftShow] = useState(false);
@@ -78,10 +106,66 @@ const QualityDetail = props => {
   const [final_Warp_Data, setFinal_Warp_Data] = useState([]);
   const [final_Weft_Data, setFinal_Weft_Data] = useState([]);
   const [isSave, setSave] = useState(false);
+  const [isOpenImageModal, setIsOpenImageModal] = useState(false);
   const [BackModal_Visible, setBackModal_Visible] = useState(false);
-  const toastRef = useRef(null);
+  const toast = useRef(null);
   const dispatch = useDispatch();
+  const bottomSheet = useRef(null);
+  const bottomSheet2 = useRef(null);
+  const [cameraPermission, setCameraPermission] = useState(null);
+  const [galleryPermission, setGalleryPermission] = useState(null);
+  const [photo_Index, setPhoto_Index] = useState();
+  const [scrollViewHeight, setScrollViewHeight] = useState(0);
+  const toastRef = useRef(null);
+  let P_input1 = useRef(null);
+  let P_input2 = useRef(null);
+  let P_input3 = useRef(null);
+  let P_input4 = useRef(null);
+  let input1 = useRef(null);
+  let input2 = useRef(null);
+  let input3 = useRef(null);
+  let input4 = useRef(null);
+  let input5 = useRef(null);
+  let input6 = useRef(null);
+  let input7 = useRef(null);
+  let input8 = useRef(null);
+  let input9 = useRef(null);
 
+  const handleLayout = event => {
+    const {height} = event.nativeEvent.layout;
+    setScrollViewHeight(height);
+  };
+
+  const SelectDoc = async () => {
+    try {
+      const select_Doc = await DocumentPicker.pickSingle({
+        type: [DocumentPicker.types.pdf],
+        copyTo: 'cachesDirectory',
+      });
+      console.log('select_Doc: ', select_Doc);
+
+      if (select_Doc?.size >= 5000000) {
+        handleError('Pdf size must be less than 5MB.');
+      } else {
+        if (photo_Index === 0) {
+          setSample(select_Doc.fileCopyUri);
+        } else if (photo_Index === 1) {
+          setLattice_Pattern(select_Doc.fileCopyUri);
+        } else if (photo_Index === 2) {
+          setPick_Pattern(select_Doc.fileCopyUri);
+        } else if (photo_Index === 3) {
+          setPasramani_Pattern(select_Doc.fileCopyUri);
+        }
+      }
+      await bottomSheet.current.close();
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) {
+        console.log('user canceled the upload: ', error);
+      } else {
+        console.log('error: ', error);
+      }
+    }
+  };
   const BackModal = () => {
     return (
       <BackModal_Detail
@@ -108,29 +192,32 @@ const QualityDetail = props => {
   }, [total_Efficiency, ExpenseCost, Expense_Cost, value]);
 
   useEffect(() => {
-    if (data != 100) {
-      setQualityName(data.name);
-      setWarp_Data(data.warp_data);
-      setWeft_Data(data.weft_data);
-      if (data.expense_type == 'Per Pick') {
+    if (data) {
+      setQualityName(data?.name);
+      setWarp_Data(data?.warp_data);
+      setWeft_Data(data?.weft_data);
+      if (data?.expense_type == AppConstant.Per_Pick) {
         setValue('second');
-        setExpense_Cost(data.cost);
+        setExpense_Cost(data?.cost);
       } else {
-        setExpense_Cost(data.expense_cost);
+        setExpense_Cost(data?.expense_cost);
       }
-      setRPM(data.rpm);
+      setRPM(data?.rpm);
       setEfficiency(data.efficiency);
-      setMachine(data.machine);
-      setReed(data.reed);
-      setWidth(data.panno);
-      setBorder(data.border);
-      setNozzle(data.nozzle);
-      setLattice(data.letis);
-      setPasramani(data.pasramani);
-      setLattice(data.letis);
-      setSteam_warp(data.steam_warp);
-      setSteam_weft(data.steam_weft);
-      setGsm(data.gsm);
+      setMachine(data?.machine);
+      setReed(data?.reed);
+      setWidth(data?.panno);
+      setBorder(data?.border);
+      setNozzle(data?.nozzle);
+      setLattice(data?.letis);
+      setPasramani(data?.pasramani);
+      setPasramani_Pattern(data?.pasramani_pattern);
+      setSample(data?.sample);
+      setLattice_Pattern(data?.latis_pattern);
+      setPick_Pattern(data?.pick_pattern);
+      setSteam_warp(data?.steam_warp);
+      setSteam_weft(data?.steam_weft);
+      setGsm(data?.gsm);
     }
   }, [data]);
 
@@ -179,44 +266,109 @@ const QualityDetail = props => {
       (parseFloat(Warp_Weight) + parseFloat(Weft_Weight)).toFixed(2),
     );
   }, [Warp_Weight, Weft_Weight]);
-  const QualityData = {
-    name: qualityName,
-    weight: quality_weight,
-    quality_cost: quality_cost,
-    total_beam_ends: total_beam_ends.toFixed(2).toString(),
-    total_pick: total_Pick.toFixed(2),
-    total_width: total_width?.toFixed(2),
-    total_warp_weight: Warp_Weight.toFixed(2),
-    total_warp_cost: Warp_Cost.toFixed(2),
-    warp_data: final_Warp_Data,
-    total_weft_weight: Weft_Weight.toString(),
-    total_weft_cost: Weft_Cost.toString(),
-    weft_data: final_Weft_Data,
-    expense_type: value == 'first' ? 'Fixed Cost' : 'Per Pick',
-    cost: value == 'first' ? '0.00' : Expense_Cost,
-    expense_cost: ExpenseCost.toString(),
-    total_efficiency: parseFloat(total_Efficiency).toFixed(2),
-    rpm: RPM,
-    efficiency: parseFloat(efficiency).toFixed(2),
-    machine: machine.toString(),
-    panno: parseFloat(Width).toFixed(2),
-    reed: reed,
-    letis: lattice,
-    border: border,
-    nozzle: nozzle,
-    pasramani: pasramani,
-    steam_weft: steam_weft,
-    steam_warp: steam_warp,
-    gsm: gsm,
-    pasramani_pattern:
-      'https://res.cloudinary.com/dw0gmxhpd/image/upload/v1718174150/quality_images/puxjjvvoiyao1vvgtr3b.jpg',
-    sample:
-      'https://res.cloudinary.com/dw0gmxhpd/image/upload/v1718174026/quality_images/shvtxcjorgmxzpkx0ly7.jpg',
-    pick_pattern:
-      'https://res.cloudinary.com/dw0gmxhpd/image/upload/v1718172718/quality_images/myvrqhfncchtyexihwxe.pdf',
-    latis_pattern:
-      'https://res.cloudinary.com/dw0gmxhpd/image/upload/v1718172718/quality_images/myvrqhfncchtyexihwxe.pdf',
-  };
+
+  QualityFormData.append('name',qualityName)
+  QualityFormData.append('weight',quality_weight)
+  QualityFormData.append('quality_cost',quality_cost)
+  QualityFormData.append('total_beam_ends',total_beam_ends.toFixed(2).toString())
+  QualityFormData.append('total_pick',total_Pick.toFixed(2))
+  QualityFormData.append('total_width',total_width?.toFixed(2))
+  QualityFormData.append('total_warp_weight',Warp_Weight.toFixed(2))
+  QualityFormData.append('total_warp_cost',Warp_Cost.toFixed(2))
+  QualityFormData.append('total_weft_weight',Weft_Weight.toString())
+  QualityFormData.append('total_weft_cost',Weft_Cost.toString())
+  QualityFormData.append('expense_type',value == 'first' ? AppConstant.Fixed_Cost : AppConstant.Per_Pick)
+  QualityFormData.append('total_efficiency',parseFloat(total_Efficiency).toFixed(2))
+  QualityFormData.append('efficiency',parseFloat(efficiency).toFixed(2))
+  QualityFormData.append('machine',machine.toString())
+  QualityFormData.append('cost',value == 'first' ? '0.00' : Expense_Cost)
+  QualityFormData.append('expense_cost',ExpenseCost?.toString())
+  QualityFormData.append('panno',parseFloat(Width).toFixed(2))
+  QualityFormData.append('reed',reed)
+  QualityFormData.append('rpm',RPM)
+  QualityFormData.append('letis',lattice)
+  QualityFormData.append('border',border)
+  QualityFormData.append('nozzle',nozzle)
+  QualityFormData.append('pasramani',pasramani)
+  QualityFormData.append('steam_weft',steam_weft)
+  QualityFormData.append('steam_warp',steam_warp)
+  QualityFormData.append('gsm',gsm)
+
+  pasramani_Pattern!==null ? QualityFormData.append('pasramani_pattern',Object.keys(pasramani_Pattern).length !== 0 ? {
+    uri: pasramani_Pattern,
+    type: pasramani_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern.split('.').pop()}`,
+    name : pasramani_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+  } : pasramani_Pattern ) : null
+
+  sample!==null ? QualityFormData.append('sample',Object.keys(sample).length !== 0 ? {
+    uri: sample,
+    type: sample.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${sample.split('.').pop()}`,
+    name : sample.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+  } : sample ) : null
+
+  pick_Pattern!==null ? QualityFormData.append('pick_pattern',Object.keys(pick_Pattern).length !== 0 ? {
+    uri: pick_Pattern,
+    type: pick_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pick_Pattern.split('.').pop()}`,
+    name : pick_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+  } : pick_Pattern ) : null
+
+  lattice_Pattern!==null ? QualityFormData.append('latis_pattern',Object.keys(lattice_Pattern).length !== 0 ? {
+    uri: lattice_Pattern,
+    type: lattice_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern.split('.').pop()}`,
+    name : lattice_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+  } : lattice_Pattern ) : null
+
+  final_Warp_Data.forEach((item, index) => {
+    for (const key in item) {
+        QualityFormData.append(`warp_data[${index}][${key}]`, item[key]);
+    }
+  });
+
+  final_Weft_Data.forEach((item, index) => {
+    for (const key in item) {
+        QualityFormData.append(`weft_data[${index}][${key}]`, item[key]);
+    }
+  });
+
+  console.log('QualityFormData: ', QualityFormData.getParts('pick_Pattern'));
+
+
+  // const QualityData = {
+  //   name: qualityName.toString(),
+  //   weight: quality_weight,
+  //   quality_cost: quality_cost,
+  //   total_beam_ends: total_beam_ends.toFixed(2).toString(),
+  //   total_pick: total_Pick.toFixed(2),
+  //   total_width: total_width?.toFixed(2),
+  //   total_warp_weight: Warp_Weight.toFixed(2),
+  //   total_warp_cost: Warp_Cost.toFixed(2),
+  //   warp_data: final_Warp_Data,
+  //   total_weft_weight: Weft_Weight.toString(),
+  //   total_weft_cost: Weft_Cost.toString(),
+  //   weft_data: final_Weft_Data,
+  //   expense_type:
+  //     value == 'first' ? AppConstant.Fixed_Cost : AppConstant.Per_Pick,
+  //   cost: value == 'first' ? '0.00' : Expense_Cost,
+  //   expense_cost: ExpenseCost?.toString(),
+  //   total_efficiency: parseFloat(total_Efficiency).toFixed(2),
+  //   rpm: RPM,
+  //   efficiency: parseFloat(efficiency).toFixed(2),
+  //   machine: machine.toString(),
+  //   panno: parseFloat(Width).toFixed(2),
+  //   reed: reed,
+  //   letis: lattice,
+  //   border: border,
+  //   nozzle: nozzle,
+  //   pasramani: pasramani,
+  //   steam_weft: steam_weft,
+  //   steam_warp: steam_warp,
+  //   gsm: gsm,
+  //   ...(pasramani_Pattern ? {pasramani_pattern: pasramani_Pattern} : null),
+  //   ...(sample ? {sample: sample} : null),
+  //   ...(pick_Pattern ? {pick_pattern: pick_Pattern} : null),
+  //   ...(lattice_Pattern ? {latis_pattern: lattice_Pattern} : null),
+  // };
+
 
   useEffect(() => {
     if (value == 'first') {
@@ -228,37 +380,48 @@ const QualityDetail = props => {
 
   useLayoutEffect(() => {
     props.navigation.setOptions({
-      headerRight: () => (
-        <TouchableOpacity style={{marginRight: '15%'}} onPress={HandleSave}>
-          <Save />
-        </TouchableOpacity>
-      ),
-      headerLeft: ({onPress}) => (
-        <TouchableOpacity
-          onPress={() => setBackModal_Visible(true)}
+      header: () => (
+        <View
           style={{
+            height: height / 15,
+            backgroundColor: Yellow,
+            flexDirection: 'row',
+            width: width,
+            justifyContent: 'space-between',
             borderWidth: 0,
             alignItems: 'center',
-            paddingTop: '5%',
-            justifyContent: 'center',
-            paddingLeft: '10%',
+            paddingHorizontal: '5%',
           }}>
-          <LeftArrow color="#fff" />
-        </TouchableOpacity>
+          <Toast ref={toastRef} />
+          <TouchableOpacity
+            onPress={() => setBackModal_Visible(true)}
+            style={{marginTop: '2%'}}>
+            <LeftArrow />
+          </TouchableOpacity>
+          <Text style={{...styleText.bold, fontSize: 20, color: White}}>
+            {AppConstant.Quality_Details}
+          </Text>
+          <TouchableOpacity disabled={loading} style={{}} onPress={HandleSave}>
+            <Save height={35} width={35} />
+          </TouchableOpacity>
+        </View>
       ),
     });
-  }, [props.navigation, QualityData]);
+  }, [props.navigation, QualityFormData]);
+
   const WarpModal = () => {
     return (
       <YarnModal
         visible={warpShow}
         setClose={setWarpShow}
-        modal_T={'Warp'}
+        modal_T={AppConstant.Warp}
         setData={setWarp_Data}
         data={warp_data}
         editData={editWarpData}
         EditWarpData={setEditWarpData}
         EditWeftData={setEditWeftData}
+        setEditWarpData={setEditWarpData}
+        setEditWeftData={setEditWeftData}
       />
     );
   };
@@ -268,111 +431,341 @@ const QualityDetail = props => {
       <YarnModal
         visible={weftShow}
         setClose={setWeftShow}
-        modal_T={'Weft'}
+        modal_T={AppConstant.Weft}
         setData={setWeft_Data}
         data={weft_data}
         editData={editWeftData}
         EditWarpData={setEditWarpData}
         EditWeftData={setEditWeftData}
+        setEditWarpData={setEditWarpData}
+        setEditWeftData={setEditWeftData}
         Width={Width}
         SetWidth={setWidth}
       />
     );
   };
-  const HandleSave = () => {
-    setSave(true);
 
-    if (
-      QualityData.name != '' &&
-      warp_data.length > 0 &&
-      weft_data.length > 0
-    ) {
-      if (data == 100) {
-        setSave(false);
-        dispatch(CreateQualityData(JSON.stringify(QualityData))).then(a => {
-          if (a.meta.requestStatus == 'fulfilled') {
-            dispatch(GetQualityData());
-            return props.navigation.navigate('Tabs');
-          } else {
-            console.log('non save');
-          }
-        });
+  const HandleSave = async () => {
+    setSave(true);
+    setLoading(true);
+    try {
+      if (
+        qualityName != '' &&
+        warp_data.length > 0 &&
+        weft_data.length > 0
+      ) {
+        if (data === undefined) {
+          setSave(false);
+          await dispatch(CreateQualityData(QualityFormData)).then(a => { //QualityData
+            if (a.payload.error) {
+              setLoading(false);
+              handleError(a.payload.message);
+            } else {
+              setLoading(false);
+              dispatch(GetQualityData());
+              return props.navigation.navigate(screens.Tabs);
+            }
+          });
+        } else {
+          setSave(false);
+          await dispatch(
+            UpdateQualityData({data: QualityFormData, id: data.id}),
+          ).then(a => {
+            if (a.error) {
+              setLoading(false);
+              handleError(a.message);
+            } else {
+              setLoading(false);
+              dispatch(GetQualityData());
+              return props.navigation.reset({
+                index: 0,
+                routes: [{name: screens.Tabs}],
+              });
+            }
+          });
+        }
       } else {
-        setSave(false);
-        dispatch(
-          UpdateQualityData({data: QualityData, id: data.id, toastRef}),
-        ).then(a => {
-          console.log(a.message, '===========update============a');
-          if (a.error) {
-            handleError(a.message);
-          } else {
-            dispatch(GetQualityData());
-            return props.navigation.navigate('Tabs');
-          }
-        });
+        setLoading(false);
       }
+    } catch (error) {
+      console.log('error123: ', error);
+      setLoading(false);
+      handleError(error.message);
     }
   };
 
   const handleError = useCallback(
     message => {
-      showMessage({
-        message: 'Error',
-        type: 'danger',
-        description: message,
-        icon: {icon: 'danger', position: 'left'},
-        style: {
-          alignItems: 'center',
-        },
-      });
+      console.log('message: ', message);
+      toastRef.current.error(message);
+      toastRef.current.Height(-StatusBar.currentHeight);
     },
     [toastRef],
   );
+
+  const requestCameraPermission = async (callback) => {
+      if (Platform.OS === AppConstant.ANDROID) {
+        const requestCameraPermissionstatus = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: AppConstant.Camera_Permission,
+            message: 'This app needs access to your camera',
+            buttonNeutral: AppConstant.AskMeLater,
+            buttonNegative: AppConstant.CANCEL,
+            buttonPositive: AppConstant.OK,
+          },
+        )
+        setCameraPermission(requestCameraPermissionstatus === AppConstant.GRANTED);
+        console.log('requestCameraPermissionstatus: ', requestCameraPermissionstatus);
+
+        if(requestCameraPermissionstatus===AppConstant.GRANTED){
+          setCameraPermission(true)
+          callback(true)
+        }else {
+          setCameraPermission(false);
+          callback(false);
+        }
+      } else {
+        // iOS permission handling
+        const cameraPermissionStatus =
+          await ImagePicker.requestCameraPermission();
+        setCameraPermission(cameraPermissionStatus === AppConstant.GRANTED);
+      }
+  };
+  console.log('sample?.uri: ', sample?.uri);
+
+  const handleTakePhoto = async() => {
+    if (!cameraPermission) {
+      await requestCameraPermission(async(granted) => {
+        if (granted) {
+          const options = {
+            title: 'Take a Photo',
+            takePhotoButtonTitle: 'Take a Photo',
+            mediaType: 'photo',
+            storageOptions: {
+              skipBackup: true,
+              path: 'images',
+            },
+          };
+
+          launchCamera(options, async(response) => {
+            if (response.didCancel) {
+              console.log('User cancelled image picker');
+            } else if (response.error) {
+              console.log('ImagePicker Error: ', response.error);
+            } else {
+              const source = response?.assets[0].uri;
+              console.log('response?.assets[0]: ', response?.assets[0]);
+          if (photo_Index === 0) {
+            setSample(source);
+          } else if (photo_Index === 1) {
+            setLattice_Pattern(source);
+          } else if (photo_Index === 2) {
+            setPick_Pattern(source);
+          } else if (photo_Index === 3) {
+            setPasramani_Pattern(source);
+          }
+          await bottomSheet2.current.close();
+            }
+          });
+        } else {
+          Alert.alert('Camera permission denied');
+          await bottomSheet2.current.close();
+        }
+      });
+    }else{
+    const options = {
+      title: 'Take a Photo',
+      takePhotoButtonTitle: 'Take a Photo',
+      mediaType: 'photo',
+      storageOptions: {
+        skipBackup: true,
+        path: 'images',
+      },
+    };
+      launchCamera(options, async response => {
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.error) {
+          console.log('ImagePicker Error: ', response.error);
+        } else {
+          console.log('response: ', response);
+          const source = response?.assets[0].uri;
+          if (photo_Index === 0) {
+            setSample(source);
+          } else if (photo_Index === 1) {
+            setLattice_Pattern(source);
+          } else if (photo_Index === 2) {
+            setPick_Pattern(source);
+          } else if (photo_Index === 3) {
+            setPasramani_Pattern(source);
+          }
+          await bottomSheet2.current.close();
+        }
+      });}
+  };
+
+  const handleChoosePhoto = async() => {
+    if (!galleryPermission) {
+      await requestGalleryPermission(async(granted) => {
+        if (granted) {
+          const options = {
+            title: 'Select Image',
+            storageOptions: {
+              skipBackup: true,
+              path: 'images',
+            },
+          };
+          launchImageLibrary(options, async(response) => {
+            if (response.didCancel) {
+              console.log('User cancelled image picker');
+            } else if (response.error) {
+              console.log('ImagePicker Error: ', response.error);
+            } else if (response.customButton) {
+              console.log('User tapped custom button: ', response.customButton);
+            } else {
+              const source = response?.assets[0].uri;
+              if (photo_Index === 0) {
+                setSample(source);
+              } else if (photo_Index === 1) {
+                setLattice_Pattern(source);
+              } else if (photo_Index === 2) {
+                setPick_Pattern(source);
+              } else if (photo_Index === 3) {
+                setPasramani_Pattern(source);
+              }
+              await bottomSheet2.current.close();
+            }
+          });
+        } else {
+          Alert.alert('Gallery permission denied');await bottomSheet2.current.close();
+
+        }
+      });
+    }else{
+      const options = {
+        title: 'Select Image',
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
+        },
+      };
+      launchImageLibrary(options, async response => {
+        console.log('response: ', response);
+        if (response.didCancel) {
+          console.log('User cancelled image picker');
+        } else if (response.error) {
+          console.log('ImagePicker Error: ', response.error);
+        } else if (response.customButton) {
+          console.log('User tapped custom button: ', response.customButton);
+        } else {
+          const source = response?.assets[0].uri;
+          if (photo_Index === 0) {
+            setSample(source);
+          } else if (photo_Index === 1) {
+            setLattice_Pattern(source);
+          } else if (photo_Index === 2) {
+            setPick_Pattern(source);
+          } else if (photo_Index === 3) {
+            setPasramani_Pattern(source);
+          }
+          await bottomSheet2.current.close();
+        }
+      });}
+  };
+
+
+  const requestGalleryPermission = async (callback) => {
+    if (Platform.OS === AppConstant.ANDROID) {
+      const galleryPermissionStatus = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        {
+          title: 'Gallery Permission',
+          message: 'This app needs access to your gallery',
+          buttonNeutral: AppConstant.AskMeLater,
+          buttonNegative: AppConstant.CANCEL,
+          buttonPositive: AppConstant.OK,
+        },
+      );
+      if (galleryPermissionStatus === AppConstant.GRANTED) {
+        setGalleryPermission(true);
+        callback(true);
+      } else {
+        setGalleryPermission(false);
+        callback(false);
+      }
+    } else {
+      // iOS permission handling
+      const galleryPermissionStatus =
+        await ImagePicker.requestPhotoLibraryPermission();
+      setGalleryPermission(galleryPermissionStatus === AppConstant.GRANTED);
+    }
+  };
+
   return (
-    <View>
-      <FlashMessage ref={toastRef} />
+    <View style={{flex: 1}}>
       <View style={{paddingBottom: '3%'}}>
+        {loading ? <Activity_Indicator /> : null}
         <View
           style={{
             flexDirection: 'row',
             marginVertical: '4%',
             justifyContent: 'space-between',
-            borderWidth: 0,
             paddingHorizontal: '3%',
+            flexGrow: 1,
+            maxWidth: width,
+            flexWrap: 'wrap',
           }}>
-          <Tag title="Weight" value={quality_weight} tag="Kg" />
-          <Tag title="Cost" value={quality_cost} tag="₹" />
+          <Tag
+            title={AppConstant.Weight}
+            value={quality_weight}
+            tag={AppConstant.KG}
+          />
+          <Tag
+            title={AppConstant.Cost}
+            value={quality_cost}
+            tag={AppConstant.ruppes}
+          />
         </View>
 
         <TextInput
           dense
           mode="outlined"
           label="Qaulity Name"
-          selectionColor="#E89E46"
+          selectionColor={Yellow}
           value={qualityName}
-          outlineColor="grey"
+          outlineColor={Border_Color}
           editable
-          activeOutlineColor="#E89E46"
-          outlineStyle={{borderRadius: 15, height: height / 19}}
+          activeOutlineColor={Yellow}
+          outlineStyle={{borderRadius: 15, height: hp(5.55)}}
           style={{
-            width: width / 1.07,
+            width: wp(94),
             alignSelf: 'center',
           }}
-          onChangeText={e => setQualityName(e)}
+          onChangeText={e => {
+            let newName = e; // don't use trim() here
+            if (newName.charAt(0) === ' ') {
+              // if the first character is a space, remove it
+              newName = newName.substring(1);
+            }
+            if (newName.length > 1) {
+              // if the input string has more than one character
+              newName = newName.replace(/\s{2,}/g, ' '); // replace 2 or more spaces with a single space
+            }
+            setQualityName(newName);
+          }}
         />
 
         {isSave ? (
           qualityName == '' ? (
-            <Text
-              style={styles.warn_text}>
-              Quality Name is required.
-            </Text>
+            <Text style={styles.warn_text}>Quality Name is required.</Text>
           ) : null
         ) : null}
       </View>
       <ScrollView
+        onLayout={handleLayout}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: '35%'}}>
+        contentContainerStyle={{paddingBottom: '3%'}}>
         {WarpModal()}
 
         <View
@@ -403,8 +796,8 @@ const QualityDetail = props => {
             setVisible={setWarpShow}
             data={warp_data}
             setData={setWarp_Data}
-            modal_type={'Warp'}
-            from={'Detail'}
+            modal_type={AppConstant.Warp}
+            from={AppConstant.Detail}
             style={{marginHorizontal: '3%', paddingRight: '9%'}}
             func={() => {
               setWarpShow(true);
@@ -436,12 +829,12 @@ const QualityDetail = props => {
             setVisible={setWeftShow}
             data={weft_data}
             setData={setWeft_Data}
-            modal_type={'Weft'}
-            from={'Detail'}
+            modal_type={AppConstant.Weft}
+            from={AppConstant.Detail}
             style={{marginHorizontal: '3%', paddingRight: '9%'}}
             func={() => {
               setWeftShow(true);
-              setModal_Type('Weft');
+              setModal_Type(AppConstant.Weft);
             }}
             setModal_Type={setModal_Type}
             setEditWeftData={setEditWeftData}
@@ -462,8 +855,8 @@ const QualityDetail = props => {
               marginHorizontal: '3%',
               marginTop: '3%',
               borderRadius: 10,
-              backgroundColor: 'white',
-              paddingBottom:"3%"
+              backgroundColor: White,
+              paddingBottom: '3%',
             },
             styles.shadow,
           ]}>
@@ -473,25 +866,43 @@ const QualityDetail = props => {
               flexDirection: 'row',
               alignItems: 'center',
               marginHorizontal: '3%',
+              borderWidth: 0,
             }}>
-            <Text style={styles.text}>Expense</Text>
+            <Text style={styles.text}>{AppConstant.Expense}</Text>
             <RadioButton.Group
               onValueChange={newValue => setValue(newValue)}
               value={value}>
-              <View style={{flexDirection: 'row', borderWidth: 0,maxWidth:width/1,flexWrap:"wrap"}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  maxWidth: wp(90),
+                  flexWrap: 'wrap',
+                }}>
                 <View
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
-                    marginLeft: width / 6,
+                    borderWidth: 0,
+                    marginLeft: wp(14),
                   }}>
                   <RadioButton
                     value="first"
-                    color="#E89E46"
-                    uncheckedColor="#E89E46"
+                    color={Yellow}
+                    uncheckedColor={Yellow}
                   />
-                  <Text style={styles.text}>Fixed Cost</Text>
+                  <Text
+                    style={{
+                      color: Black,
+                      ...styleText.semiBold,
+                      fontSize: hp(1.9),
+                      maxWidth: wp(20),
+                      borderWidth: 0,
+                      flexWrap: 'wrap',
+                    }}>
+                    {AppConstant.Fixed_Cost}
+                  </Text>
                 </View>
+
                 <View
                   style={{
                     flexDirection: 'row',
@@ -500,15 +911,24 @@ const QualityDetail = props => {
                   }}>
                   <RadioButton
                     value="second"
-                    color="#E89E46"
-                    uncheckedColor="#E89E46"
+                    color={Yellow}
+                    uncheckedColor={Yellow}
                   />
-                  <Text style={styles.text}>Per Pick</Text>
+                  <Text
+                    style={{
+                      color: Black,
+                      ...styleText.semiBold,
+                      fontSize: hp(1.9),
+                      maxWidth: wp(20),
+                      flexWrap: 'wrap',
+                    }}>
+                    {AppConstant.Per_Pick}
+                  </Text>
                 </View>
               </View>
             </RadioButton.Group>
           </View>
-          <DottedLine />
+          <DottedLine margin={{marginHorizontal: '3%'}} />
           <View
             style={{
               flexDirection: 'row',
@@ -519,16 +939,16 @@ const QualityDetail = props => {
               mode="outlined"
               label="Cost"
               keyboardType="phone-pad"
-              selectionColor="#E89E46"
-              value={Expense_Cost.toString()}
+              selectionColor={Yellow}
+              value={Expense_Cost?.toString()}
               numberOfLines={1}
               dense
               outlineColor="rgba(45, 48, 61, 0.1)"
-              activeOutlineColor="#E89E46"
+              activeOutlineColor={Yellow}
               outlineStyle={{
                 borderRadius: 20,
-                backgroundColor: 'white',
-                height: height / 20,
+                backgroundColor: White,
+                height: hp(5),
                 width: width / 4,
                 borderWidth: 1,
               }}
@@ -537,14 +957,16 @@ const QualityDetail = props => {
                 marginLeft: height / 66,
                 width: width / 4,
               }}
-              onChangeText={text => Validation(text, setExpense_Cost, 'Cost')}
+              onChangeText={text =>
+                Validation_YarnData(text, setExpense_Cost, AppConstant.Cost)
+              }
             />
             {value === 'second' ? (
               <View style={{flexDirection: 'row'}}>
                 <Text
                   style={{
                     fontSize: 15,
-                    color: 'rgba(45, 48, 61, 0.9)',
+                    color: Black,
                     marginLeft: '5%',
                     marginTop: '8%',
                   }}>
@@ -553,19 +975,19 @@ const QualityDetail = props => {
                 <View
                   style={{
                     borderWidth: 1,
-                    height: height / 21,
+                    height: hp(5),
                     width: width / 4,
                     marginLeft: '5%',
                     marginTop: '3%',
                     borderRadius: 15,
-                    borderColor: 'rgba(45, 48, 61, 0.1)',
+                    borderColor: TextInput_Border_Color,
                     justifyContent: 'center',
                   }}>
                   <Text
                     style={{
                       marginHorizontal: '15%',
                       fontSize: 15,
-                      color: 'black',
+                      color: Black,
                     }}>
                     {ExpenseCost}
                   </Text>
@@ -582,7 +1004,7 @@ const QualityDetail = props => {
               marginHorizontal: '3%',
               marginTop: '3%',
               borderRadius: 10,
-              backgroundColor: 'white',
+              backgroundColor: White,
               flexDirection: 'column',
             },
             styles.shadow,
@@ -596,12 +1018,16 @@ const QualityDetail = props => {
             }}>
             <View
               style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-              <Text style={styles.text}>Production</Text>
-              <Text style={styles.text}>Pick : {total_Pick}</Text>
-              <Text style={styles.text}>{total_Efficiency} m/d</Text>
+              <Text style={styles.text}>{AppConstant.Production}</Text>
+              <Text style={styles.text}>
+                {AppConstant.Pick} : {total_Pick}
+              </Text>
+              <Text style={styles.text}>
+                {total_Efficiency} {AppConstant.MD}
+              </Text>
             </View>
           </View>
-          <DottedLine />
+          <DottedLine margin={{marginHorizontal: '3%'}} />
           {/* 4 input */}
 
           <View
@@ -614,24 +1040,44 @@ const QualityDetail = props => {
               justifyContent: 'center',
             }}>
             <Production_Input
+            IsDisable={false}
+              func={i => (P_input1 = i)}
+              onSubmitEditing={() => P_input2.focus()}
+              returnKeyType="next"
+              returnKeyLabel="next"
               value={RPM.toString()}
               setValue={setRPM}
-              lable={'RPM'}
+              lable={AppConstant.RPM}
             />
             <Production_Input
+            IsDisable={false}
+              func={i => (P_input2 = i)}
+              returnKeyType="next"
+              returnKeyLabel="next"
+              onSubmitEditing={() => P_input3.focus()}
               value={efficiency.toString()}
               setValue={setEfficiency}
-              lable={'Efficiency'}
+              lable={AppConstant.Efficiency}
             />
             <Production_Input
+            IsDisable={false}
+              func={i => (P_input3 = i)}
+              returnKeyType="done"
+              returnKeyLabel="done"
+              onSubmitEditing={() => console.log('Form submitted')}
               value={machine.toString()}
               setValue={setMachine}
-              lable={'Machine'}
+              lable={AppConstant.Machine}
             />
             <Production_Input
+            IsDisable={true}
+              func={i => (P_input4 = i)}
+              returnKeyType="done"
+              returnKeyLabel="done"
+              onSubmitEditing={() => console.log('Form submitted')}
               value={parseFloat(labour).toFixed(2)}
               setValue={setLabour}
-              lable={'Labour'}
+              lable={AppConstant.Labour}
             />
           </View>
         </View>
@@ -641,7 +1087,7 @@ const QualityDetail = props => {
           style={[
             {
               borderWidth: 0,
-              backgroundColor: 'white',
+              backgroundColor: White,
               marginHorizontal: '3%',
               borderRadius: 10,
               marginTop: '3%',
@@ -649,7 +1095,9 @@ const QualityDetail = props => {
             styles.shadow,
           ]}>
           <View style={{marginHorizontal: '3%', borderWidth: 0}}>
-            <Text style={[styles.text, {marginTop: '2%'}]}>Information</Text>
+            <Text style={[styles.text, {marginTop: '2%'}]}>
+              {AppConstant.Information}
+            </Text>
             <DottedLine margin={{marginVertical: '2%'}} />
             <View
               style={{
@@ -658,58 +1106,104 @@ const QualityDetail = props => {
                 marginBottom: '4%',
               }}>
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input1 = i)}
+                onSubmitEditing={() => input2.focus()}
+                returnKeyType="next"
+                returnKeyLabel="next"
                 style={styles.Information_Input}
                 value={reed}
                 setValue={setReed}
-                lable={'Reed'}
+                lable={AppConstant.Reed}
               />
               <Information_Input
+                keyboardType={'number-pad'}
+                func={i => (input2 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input3.focus()}
                 style={styles.Information_Input}
                 value={Width}
                 setValue={setWidth}
-                lable={'Width(Panno)'}
+                lable={`${AppConstant.Width}(${AppConstant.Panno})`}
               />
+
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input3 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input4.focus()}
                 style={styles.Information_Input}
                 value={border}
                 setValue={setBorder}
-                lable={'Border'}
+                lable={AppConstant.Border}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input4 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input5.focus()}
                 style={styles.Information_Input}
                 value={nozzle}
                 setValue={setNozzle}
-                lable={'Nozzle'}
+                lable={AppConstant.Nozzle}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input5 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input6.focus()}
                 style={styles.Information_Input}
                 value={pasramani}
                 setValue={setPasramani}
-                lable={'Pasramani'}
+                lable={AppConstant.Pasramani}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input6 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input7.focus()}
                 style={styles.Information_Input}
                 value={lattice}
                 setValue={setLattice}
-                lable={'Lattice'}
+                lable={AppConstant.Lattice}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input7 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input8.focus()}
                 style={styles.Information_Input}
                 value={steam_warp}
                 setValue={setSteam_warp}
-                lable={'Steam (warp)'}
+                lable={AppConstant.Steam_Warp}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input8 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input9.focus()}
                 style={styles.Information_Input}
                 value={steam_weft}
                 setValue={setSteam_weft}
-                lable={'Steam (weft)'}
+                lable={AppConstant.Steam_Weft}
               />
               <Information_Input
+                keyboardType={'default'}
+                func={i => (input9 = i)}
+                returnKeyType="done"
+                returnKeyLabel="done"
+                onSubmitEditing={() => console.log('done')}
                 style={styles.Information_Input}
                 value={gsm}
                 setValue={setGsm}
-                lable={'gsm'}
+                lable={AppConstant.Gsm}
               />
             </View>
           </View>
@@ -720,25 +1214,157 @@ const QualityDetail = props => {
           style={[
             {
               borderWidth: 0,
-              backgroundColor: 'white',
+              backgroundColor: White,
               margin: '3%',
               borderRadius: 10,
             },
             styles.shadow,
           ]}>
           <View style={{marginHorizontal: '3%', borderWidth: 0}}>
-            <Text style={[styles.text, {marginTop: '2%'}]}>Photos</Text>
+            <Text style={[styles.text, {marginTop: '2%'}]}>
+              {AppConstant.Photos}
+            </Text>
             <DottedLine margin={{marginVertical: '2%'}} />
             <View style={{flexDirection: 'row', flexWrap: 'wrap'}}>
-              <Photos title={'Sample'} />
-              <Photos title={'Lattice Pattern'} />
-              <Photos title={'Pick Pattern'} />
-              <Photos title={'Pasramani'} />
+              <Photos
+                photo={sample}
+                title={AppConstant.Sample}
+                onPress={() => {
+                  if (sample) {
+                    props.navigation.navigate(screens.ImageView, {
+                      image: sample,
+                      Title: AppConstant.Sample,
+                    });
+                  } else {
+                    setPhoto_Index(0);
+                    bottomSheet.current.show();
+                  }
+                }}
+                onPressDelete={() => {
+                  setSample(null);
+                }}
+              />
+              <Photos
+                photo={lattice_Pattern}
+                title={AppConstant.Lattice_Pattern}
+                onPress={() => {
+                  if (lattice_Pattern) {
+                    props.navigation.navigate(screens.ImageView, {
+                      image: lattice_Pattern,
+                      Title: AppConstant.Lattice_Pattern,
+                    });
+                  } else {
+                    setPhoto_Index(1);
+                    bottomSheet.current.show();
+                  }
+                }}
+                onPressDelete={() => {
+                  setLattice_Pattern(null);
+                }}
+              />
+              <Photos
+                photo={pick_Pattern}
+                title={AppConstant.Pick_Pattern}
+                onPress={() => {
+                  if (pick_Pattern) {
+                    props.navigation.navigate(screens.ImageView, {
+                      image: pick_Pattern,
+                      Title: AppConstant.Pick_Pattern,
+                    });
+                  } else {
+                    setPhoto_Index(2);
+                    bottomSheet.current.show();
+                  }
+                }}
+                onPressDelete={() => {
+                  setPick_Pattern(null);
+                }}
+              />
+              <Photos
+                photo={pasramani_Pattern}
+                title={AppConstant.Pasramani}
+                onPress={() => {
+                  if (pasramani_Pattern) {
+                    props.navigation.navigate(screens.ImageView, {
+                      image: pasramani_Pattern,
+                      Title: AppConstant.Pasramani_Pattern,
+                    });
+                  } else {
+                    setPhoto_Index(3);
+                    bottomSheet.current.show();
+                  }
+                }}
+                onPressDelete={() => {
+                  setPasramani_Pattern(null);
+                }}
+              />
             </View>
           </View>
         </View>
         {BackModal()}
       </ScrollView>
+      <BottomSheet hasDraggableIcon ref={bottomSheet} height={180}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 0,
+          }}>
+          <TouchableOpacity
+            onPress={() => {
+              bottomSheet.current.close();
+              bottomSheet2.current.show();
+            }}
+            style={{alignItems: 'center', padding: '10%'}}>
+            <Image height={85} width={85} />
+            <Text style={{...styleText.bold, color: Black, fontSize: 15}}>
+              {AppConstant.Image}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={SelectDoc}
+            style={{alignItems: 'center', padding: '10%'}}>
+            <Pdf height={85} width={85} />
+            <Text style={{...styleText.bold, color: Black, fontSize: 15}}>
+              {AppConstant.Pdf}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
+      <BottomSheet hasDraggableIcon ref={bottomSheet2} height={180}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderWidth: 0,
+          }}>
+          <TouchableOpacity
+            onPress={handleTakePhoto}
+            style={{alignItems: 'center', padding: '7%', paddingBottom: '10%'}}>
+            <Camera height={100} width={100} />
+            <Text
+              style={{
+                ...styleText.bold,
+                color: Black,
+                fontSize: 15,
+                position: 'absolute',
+                bottom: 32,
+              }}>
+              {AppConstant.Camera}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={handleChoosePhoto}
+            style={{alignItems: 'center', padding: '7%'}}>
+            <Image height={85} width={85} />
+            <Text style={{...styleText.bold, color: Black, fontSize: 15}}>
+              {AppConstant.Gallery}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </BottomSheet>
       {/* {Yarn_Modal()} */}
     </View>
   );
@@ -749,7 +1375,7 @@ export default QualityDetail;
 const styles = StyleSheet.create({
   header: {
     height: height / 9,
-    backgroundColor: '#E89E46',
+    backgroundColor: Yellow,
   },
   header_container: {
     flexDirection: 'row',
@@ -765,17 +1391,16 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   text: {
-    color: 'black',
+    color: Black,
     ...styleText.semiBold,
-    borderWidth: 0,
-    fontSize:15,
-    maxWidth: width / 3.6,
+    fontSize: hp(1.9),
+    maxWidth: wp(25),
     flexWrap: 'wrap',
   },
   warn_text: {
-    color: 'red',
+    color: Red,
     ...styleText.semiBold,
-    fontSize: 14,
+    fontSize: hp(1.8),
     opacity: 0.7,
     alignSelf: 'flex-end',
     margin: '1%',
@@ -788,9 +1413,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: '3%',
     marginTop: '3%',
-    backgroundColor: 'white',
-    shadowColor: '#000',
-    backgroundColor: 'white',
+    backgroundColor: White,
+    shadowColor: Black,
+    backgroundColor: White,
     shadowOffset: {width: 1, height: 0},
     shadowOpacity: 0.9,
     shadowRadius: 1,

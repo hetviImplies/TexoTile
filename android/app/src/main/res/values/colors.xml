@@ -1,3 +1,4 @@
 <resources>
     <color name="yellow">#E89E46</color>
+    <color name="trans">#99FFFFFF</color>
 </resources>

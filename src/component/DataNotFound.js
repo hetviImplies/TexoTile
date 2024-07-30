@@ -1,25 +1,29 @@
 import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
-import DataNot from '../assets/svgs/DataNot'
+import React, { useContext } from 'react'
 import { styleText } from '../assets/fonts/Fonts'
-const {height,width}=Dimensions.get("window")
-const DataNotFound = ({func , title}) => {
+import { ConditionContext } from '../screens/ConditionContext'
+import { hp, wp } from '../Global_Com/responsiveScreen'
+import { Grey, White, Yellow } from '../Global_Com/color'
+import { DataNotFoundLogo } from '../assets/svgs/svg'
+const DataNotFound = ({func , title,search}) => {
+  const { condition } = useContext(ConditionContext);
   return (
     <View style={styles.container}>
           <View
             style={styles.view}>
-            <DataNot />
+            <DataNotFoundLogo height={hp(30)} width={hp(30)}/>
             <Text
               style={styles.text}>
               Data not found
             </Text>
+            {(search || search==='') || condition==='view' ? null :
             <TouchableOpacity
               onPress={func}
               style={styles.btn}>
-              <Text style={{color: 'white', fontSize: 16,...styleText.bold}}>
+              <Text style={{color: White, fontSize: 16,...styleText.bold}}>
                 {title}
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </View>
         </View>
   )
@@ -30,26 +34,25 @@ export default DataNotFound
 const styles = StyleSheet.create({
     view:{
       justifyContent: 'center',
-      flexDirection: 'colunm',
       alignItems: 'center',
-      marginVertical: '50%',
+      flexDirection:"column",
+      marginVertical:"30%"
     },
     text:{
-      marginTop: '2%',
-      fontSize: 24,
-      color: '#595F69',
+      fontSize: hp(3),
+      color: Grey,
       ...styleText.bold
     },
     btn:{
       marginTop: '5%',
       alignItems: 'center',
-      height: '20%',
-      width: width / 2,
+      height: hp(7),
+      width: wp(45),
       justifyContent: 'center',
       borderRadius: 10,
-      backgroundColor: '#EFA44A',
+      backgroundColor:Yellow,
     },
     container:{
-      height:"100%"
+      flex:1
     }
 })

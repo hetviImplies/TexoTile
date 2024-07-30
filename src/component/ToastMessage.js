@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React, { useEffect } from 'react'
 import Toast from 'react-native-toast-message';
+import { Black, White } from '../Global_Com/color';
 
 const ToastMessage = () => {
 
@@ -12,8 +13,8 @@ const ToastMessage = () => {
   styles:{
 
   },
-  backgroundColor: '#2D303D',
-  color: '#FFFFFF',
+  backgroundColor: Black,
+  color: White,
   fontSize: 16,
         });
       }

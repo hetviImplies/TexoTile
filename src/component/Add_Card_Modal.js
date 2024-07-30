@@ -6,16 +6,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import Close from '../assets/svgs/Close';
-import Down_arrow from '../assets/svgs/Down_arrow';
+import React, {useEffect, useRef, useState} from 'react';
 import Information_Input from './Information_Input';
-import ButtonPress from './ButtonPress';
 import DottedLine from './DottedLine';
 import All_Yarn_Modal from './Select_CompanyYarn_Modal';
-import Edit from '../assets/svgs/Edit';
 const {height, width} = Dimensions.get('window');
-import {DecimalNum} from '../assets/Regex/Regex';
+import {styleText} from '../assets/fonts/Fonts';
+import {useDispatch, useSelector} from 'react-redux';
+import {GetCompanyData, GetYarnData} from '../Slice/YarnSlice';
+import {Close_Black, Down_Arrow} from '../assets/svgs/svg';
+import {
+  Black,
+  Border_Color,
+  TextInput_Border_Color,
+  Transparent,
+  White,
+  Yellow,
+} from '../Global_Com/color';
+import { DecimalNum, OnlyNum } from '../Utils/Regex';
+import { wp } from '../Global_Com/responsiveScreen';
 
 const YarnModal = ({
   visible,
@@ -28,6 +37,8 @@ const YarnModal = ({
   EditWeftData,
   SetWidth,
   Width,
+  setEditWarpData,
+  setEditWeftData,
 }) => {
   const [showYarnModal, setShowYarnModal] = useState(false);
   const [yarn_name, setYarn_name] = useState('Select Yarn name');
@@ -36,15 +47,23 @@ const YarnModal = ({
   const [modal_Type, setModal_Type] = useState();
   const [index, setIndex] = useState();
   const [isDisable, setIsDisable] = useState(true);
+  const dispatch = useDispatch();
+  let input1 = useRef(null);
+  let input2 = useRef(null);
+  let input3 = useRef(null);
+  let input4 = useRef(null);
+  let input5 = useRef(null);
+  let input6 = useRef(null);
+
   const [Warp_Data, setWarp_data] = useState({
     id: null,
-    weight: '0.00',
-    cost: '0.00',
+    weight: '00.00',
+    cost: '00.00',
     deniar: '',
     beam_ends: '',
     shortage: '',
     yarn_rate: '',
-    tpm: Number(''),
+    tpm: Number('0'),
     company: {
       id: null,
       name: '',
@@ -63,14 +82,14 @@ const YarnModal = ({
   });
   const [Weft_Data, setWeft_data] = useState({
     id: null,
-    weight: '0.00',
-    cost: '0.00',
+    weight: '00.00',
+    cost: '00.00',
     deniar: '',
     pick: '',
     width: '',
     wastage: '',
     yarn_rate: '',
-    tpm: Number(''),
+    tpm: Number('0'),
     company: {
       id: null,
       name: '',
@@ -119,7 +138,7 @@ const YarnModal = ({
   const Yarn_Modal = () => {
     return (
       <All_Yarn_Modal
-      editData={editData}
+        editData={editData}
         setYarn_name={setYarn_name}
         setCompany_name={setCompany_name}
         data={modal_T == 'Warp' ? setWarp_data : setWeft_data}
@@ -138,7 +157,7 @@ const YarnModal = ({
       setData(updatedWeftData);
       SetWidth(newWidth);
     }
-  }, [Weft_Data]);
+  }, [Weft_Data.width]);
 
   const HandlePress = () => {
     if (Warp_Data.id != null || Weft_Data.id != null) {
@@ -152,10 +171,10 @@ const YarnModal = ({
                 weight: Warp_Data.weight,
                 cost: Warp_Data.cost,
                 deniar: Number(Warp_Data.deniar).toFixed(2),
-                beam_ends: Number(Warp_Data.beam_ends).toFixed(2),
+                beam_ends: Number(Warp_Data.beam_ends).toFixed(0),
                 shortage: Number(Warp_Data.shortage).toFixed(2),
                 yarn_rate: Number(Warp_Data.yarn_rate).toFixed(2),
-                tpm: Number(Warp_Data.tpm),
+                tpm: Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm),
                 company: Warp_Data.company,
                 yarn: Warp_Data.yarn,
               };
@@ -175,7 +194,7 @@ const YarnModal = ({
                 width: Weft_Data.width,
                 wastage: Weft_Data.wastage,
                 yarn_rate: Weft_Data.yarn_rate,
-                tpm: Number(Weft_Data.tpm),
+                tpm: Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
                 company: Weft_Data.company,
                 yarn: Weft_Data.yarn,
               };
@@ -198,6 +217,8 @@ const YarnModal = ({
       }
       setClose(false);
       EraseData();
+      setEditWarpData(null);
+      setEditWeftData(null);
     } else {
       const isCreateData = data.find((a, i) => i == index);
       if (isCreateData != undefined) {
@@ -209,10 +230,10 @@ const YarnModal = ({
                 weight: Warp_Data.weight,
                 cost: Warp_Data.cost,
                 deniar: Number(Warp_Data.deniar).toFixed(2),
-                beam_ends: Warp_Data.beam_ends,
+                beam_ends: Number(Warp_Data.beam_ends).toFixed(0),
                 shortage: Number(Warp_Data.shortage).toFixed(2),
                 yarn_rate: Warp_Data.yarn_rate,
-                tpm: Number(Warp_Data.tpm),
+                tpm: Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm),
                 company: Warp_Data.company,
                 yarn: Warp_Data.yarn,
               };
@@ -232,7 +253,7 @@ const YarnModal = ({
                 width: Weft_Data.width,
                 wastage: Weft_Data.wastage,
                 yarn_rate: Weft_Data.yarn_rate,
-                tpm: Number(Weft_Data.tpm),
+                tpm: Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
                 company: Weft_Data.company,
                 yarn: Weft_Data.yarn,
               };
@@ -256,46 +277,60 @@ const YarnModal = ({
     }
     setClose(false);
     EraseData();
+    setEditWarpData(null);
+    setEditWeftData(null);
   };
-  useEffect(() => {
-    if (modal_T == 'Warp') {
-      if (
-        Warp_Data.deniar != '' &&
-        Warp_Data.beam_ends != '' &&
-        Warp_Data.shortage != '' &&
-        Warp_Data.yarn_rate != '' &&
-        Warp_Data.company.name != '' &&
-        Warp_Data.yarn.name != ''
-      ) {
-        setIsDisable(false);
-      } else {
-        setIsDisable(true);
-      }
-    } else if (modal_T == 'Weft') {
-      if (
-        Weft_Data.deniar &&
-        Weft_Data.pick &&
-        Weft_Data.width &&
-        Weft_Data.yarn_rate &&
-        Weft_Data.wastage &&
-        Weft_Data.yarn_rate &&
-        Weft_Data.company.name != '' &&
-        Weft_Data.yarn.name != ''
-      ) {
-        setIsDisable(false);
-      } else {
-        setIsDisable(true);
-      }
+
+  const Warp_Data_Input = () =>{
+    if (
+      Warp_Data.deniar != '' &&
+      Warp_Data.beam_ends != '' &&
+      Warp_Data.shortage != '' &&
+      Warp_Data.yarn_rate != '' &&
+      Warp_Data.company.name != '' &&
+      Warp_Data.yarn.name != ''
+    ) {
+      setIsDisable(false);
+    } else {
+      setIsDisable(true);
     }
-    GetWeightAndCost();
+    Warp_GetWeightAndCost()
+  }
+
+  const Weft_Data_Input = () =>{
+    if (
+      Weft_Data.deniar &&
+      Weft_Data.pick &&
+      Weft_Data.width &&
+      Weft_Data.yarn_rate &&
+      Weft_Data.wastage &&
+      Weft_Data.yarn_rate &&
+      Weft_Data.company.name != '' &&
+      Weft_Data.yarn.name != ''
+    ) {
+      setIsDisable(false);
+    } else {
+      setIsDisable(true);
+    }
+    Weft_GetWeightAndCost()
+  }
+
+  useEffect(() => {
+    Warp_Data_Input()
   }, [
     Warp_Data.deniar,
     Warp_Data.yarn_rate,
-    Weft_Data.yarn_rate,
     Warp_Data.beam_ends,
     Warp_Data.shortage,
     Warp_Data.yarn,
     Warp_Data.company,
+
+  ]);
+
+  useEffect(() => {
+    Weft_Data_Input()
+  }, [
+    Weft_Data.yarn_rate,
     Weft_Data.deniar,
     Weft_Data.pick,
     Weft_Data.width,
@@ -305,9 +340,8 @@ const YarnModal = ({
     Weft_Data.yarn,
   ]);
 
-  const GetWeightAndCost = () => {
-    if (modal_T == 'Warp') {
-      let value =
+  const Warp_GetWeightAndCost=()=>{
+    let value =
         parseFloat(Warp_Data.deniar) * parseFloat(Warp_Data.beam_ends);
       const weight =
         (((value * parseFloat(Warp_Data.shortage)) / 100 + value) / 9000000) *
@@ -317,10 +351,12 @@ const YarnModal = ({
         parseFloat(Warp_Data.yarn_rate);
       setWarp_data({
         ...Warp_Data,
-        weight: isNaN(weight.toFixed(2)) ? '0.00' : weight.toFixed(2),
-        cost: isNaN(cost.toFixed(2)) ? '0.00' : cost.toFixed(2),
+        weight: isNaN(weight.toFixed(2)) ? '00.00' : weight.toFixed(2),
+        cost: isNaN(cost.toFixed(2)) ? '00.00' : cost.toFixed(2),
       });
-    } else {
+  }
+
+  const Weft_GetWeightAndCost = () => {
       let value =
         parseFloat(Weft_Data.deniar) *
         parseFloat(Weft_Data.pick) *
@@ -331,15 +367,15 @@ const YarnModal = ({
       const cost =
         (((value * parseFloat(Weft_Data.wastage)) / 100 + value) / 9000000) *
         parseFloat(Weft_Data.yarn_rate);
-      const finalWeight = isNaN(weight) ? '0.00' : weight.toFixed(2);
-      const finalCost = isNaN(cost) ? '0.00' : cost.toFixed(2);
+      const finalWeight = isNaN(weight) ? '00.00' : weight.toFixed(2);
+      const finalCost = isNaN(cost) ? '00.00' : cost.toFixed(2);
       setWeft_data({
         ...Weft_Data,
         weight: finalWeight,
         cost: finalCost,
       });
-    }
   };
+
   const EraseData = () => {
     setYarn_name('Select Yarn name');
     setCompany_name('Select Company name');
@@ -353,7 +389,7 @@ const YarnModal = ({
       beam_ends: '',
       shortage: '',
       yarn_rate: '',
-      tpm: '',
+      tpm: Number(''),
       company: {
         id: null,
         name: '',
@@ -379,7 +415,7 @@ const YarnModal = ({
       width: '',
       wastage: '',
       yarn_rate: '',
-      tpm: '',
+      tpm: Number(''),
       company: {
         id: null,
         name: '',
@@ -404,7 +440,7 @@ const YarnModal = ({
           flex: 1,
           alignItems: 'center',
           justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: Transparent,
         }}>
         <View
           style={{
@@ -413,13 +449,13 @@ const YarnModal = ({
             bottom: 0,
             borderTopLeftRadius: 15,
             borderTopRightRadius: 15,
-            backgroundColor: 'white',
+            backgroundColor: White,
             alignItems: 'center',
           }}>
           <View
             style={{
-              borderWidth: 1,
-              padding:"3%"
+              borderWidth: 0,
+              padding: '3%',
             }}>
             <View
               style={{
@@ -428,7 +464,13 @@ const YarnModal = ({
                 borderWidth: 0,
                 justifyContent: 'space-between',
               }}>
-              <Text style={{color: 'black', fontSize: 15, fontWeight: '500'}}>
+              <Text
+                style={{
+                  color: Black,
+                  fontSize: 16,
+                  ...styleText.bold,
+                  marginLeft: '3%',
+                }}>
                 {modal_T}
               </Text>
               <View
@@ -438,13 +480,31 @@ const YarnModal = ({
                   borderWidth: 0,
                   justifyContent: 'center',
                 }}>
-                <Text>W : </Text>
-                <Text numberOfLines={2}  style={{color: 'rgba(45, 48, 61, 1)',flexWrap:"wrap",borderWidth:0,maxWidth:"28%"}}>
+                <Text style={{...styleText.semiBold, fontSize: 15}}>W : </Text>
+                <Text
+                  numberOfLines={2}
+                  style={{
+                    color: Black,
+                    flexWrap: 'wrap',
+                    borderWidth: 0,
+                    maxWidth: width / 5,
+                    ...styleText.semiBold,
+                    fontSize: 15,
+                  }}>
                   {modal_T == 'Warp' ? Warp_Data.weight : Weft_Data.weight}
                 </Text>
-                <View style={{borderWidth: 0.7, marginHorizontal: '6%'}}></View>
-                <Text>C : </Text>
-                <Text style={{color: 'rgba(45, 48, 61, 1)',flexWrap:"wrap",borderWidth:0,maxWidth:"28%"}}>
+                <View
+                  style={{borderRightWidth: 1, marginHorizontal: '6%'}}></View>
+                <Text style={{...styleText.semiBold, fontSize: 15}}>C : </Text>
+                <Text
+                  style={{
+                    color: Black,
+                    flexWrap: 'wrap',
+                    borderWidth: 0,
+                    maxWidth: width / 5,
+                    ...styleText.semiBold,
+                    fontSize: 15,
+                  }}>
                   {modal_T == 'Warp' ? Warp_Data.cost : Weft_Data.cost}
                 </Text>
               </View>
@@ -455,11 +515,17 @@ const YarnModal = ({
                   setClose(false);
                   EraseData();
                 }}>
-                <Close color="#292D32" />
+                <Close_Black height={25} width={25} />
               </TouchableOpacity>
             </View>
             <DottedLine margin={{marginTop: '3%', marginBottom: '3%'}} />
-            <Text style={{color: 'black', fontSize: 15, marginLeft: '2%'}}>
+            <Text
+              style={{
+                color: Black,
+                fontSize: 15,
+                marginLeft: '2%',
+                ...styleText.medium,
+              }}>
               Yarn name
             </Text>
 
@@ -467,10 +533,11 @@ const YarnModal = ({
               onPress={() => {
                 setShowYarnModal(true);
                 setModal_Type('Yarn');
+                dispatch(GetYarnData());
               }}
               style={{
                 borderWidth: 1,
-                borderColor: 'rgba(45, 48, 61, 0.1)',
+                borderColor: TextInput_Border_Color,
                 height: height / 18,
                 borderRadius: 15,
                 marginVertical: '2%',
@@ -483,25 +550,32 @@ const YarnModal = ({
                   flexDirection: 'row',
                   marginHorizontal: '3%',
                 }}>
-                <Text>{yarn_name}</Text>
-                <Down_arrow />
+                <Text style={{...styleText.medium,width:wp(80)}}>{yarn_name}</Text>
+                <Down_Arrow />
               </View>
             </TouchableOpacity>
 
-            <Text style={{color: 'black', fontSize: 15, marginLeft: '2%'}}>
+            <Text
+              style={{
+                color: Black,
+                fontSize: 15,
+                marginLeft: '2%',
+                ...styleText.medium,
+              }}>
               Company name
             </Text>
             <TouchableOpacity
               onPress={() => {
                 setShowYarnModal(true);
                 setModal_Type('Company');
+                dispatch(GetCompanyData());
               }}
               style={{
                 borderWidth: 1,
-                borderColor: 'rgba(45, 48, 61, 0.1)',
+                borderColor: TextInput_Border_Color,
                 height: height / 18,
                 borderRadius: 15,
-                marginTop:"2%",
+                marginTop: '2%',
                 justifyContent: 'center',
               }}>
               <View
@@ -511,8 +585,8 @@ const YarnModal = ({
                   flexDirection: 'row',
                   marginHorizontal: '3%',
                 }}>
-                <Text>{company_name}</Text>
-                <Down_arrow />
+                <Text style={{...styleText.medium,width:wp(80)}}>{company_name}</Text>
+                <Down_Arrow />
               </View>
             </TouchableOpacity>
 
@@ -525,6 +599,11 @@ const YarnModal = ({
                 marginTop: '3%',
               }}>
               <Information_Input
+              keyboardType={"number-pad"}
+                func={i => (input1 = i)}
+                onSubmitEditing={() => input2.focus()}
+                returnKeyType="next"
+                returnKeyLabel="next"
                 style={styles.Information_Input}
                 lable={'Deniar'}
                 value={
@@ -557,6 +636,11 @@ const YarnModal = ({
                 }
               />
               <Information_Input
+              keyboardType={"number-pad"}
+                func={i => (input2 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input3.focus()}
                 style={styles.Information_Input}
                 lable={modal_T == 'Warp' ? 'Ends' : 'Pick'}
                 value={
@@ -572,9 +656,10 @@ const YarnModal = ({
                   modal_T == 'Warp'
                     ? text => {
                         if (text === '' || DecimalNum.test(text)) {
+                          let t=text.replace(OnlyNum, '');
                           setWarp_data({
                             ...Warp_Data,
-                            beam_ends: text,
+                            beam_ends: t,
                           });
                         }
                       }
@@ -588,6 +673,11 @@ const YarnModal = ({
                 }
               />
               <Information_Input
+              keyboardType={"number-pad"}
+                func={i => (input3 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => input4.focus()}
                 style={styles.Information_Input}
                 lable={modal_T == 'Warp' ? 'Shortage' : 'Width'}
                 value={
@@ -618,11 +708,22 @@ const YarnModal = ({
                 }
               />
               <Information_Input
+              keyboardType={"number-pad"}
+                func={i => (input4 = i)}
+                returnKeyType="next"
+                returnKeyLabel="next"
+                onSubmitEditing={() => {
+                  if (modal_T === 'Weft') {
+                    input5.focus();
+                  } else {
+                    input6.focus();
+                  }
+                }}
                 style={styles.Information_Input}
                 lable={'Y.Rate'}
                 value={
                   modal_T == 'Warp'
-                  ? isNaN(parseFloat(Warp_Data.yarn_rate))
+                    ? isNaN(parseFloat(Warp_Data.yarn_rate))
                       ? ''
                       : Warp_Data.yarn_rate
                     : isNaN(parseFloat(Weft_Data.yarn_rate))
@@ -649,6 +750,11 @@ const YarnModal = ({
               />
               {modal_T == 'Weft' ? (
                 <Information_Input
+                keyboardType={"number-pad"}
+                  func={i => (input5 = i)}
+                  returnKeyType="next"
+                  returnKeyLabel="next"
+                  onSubmitEditing={() => input6.focus()}
                   style={styles.Information_Input}
                   lable={'Wastage'}
                   value={
@@ -666,10 +772,15 @@ const YarnModal = ({
                 />
               ) : null}
               <Information_Input
+              keyboardType={"number-pad"}
+                func={i => (input6 = i)}
+                returnKeyType="done"
+                returnKeyLabel="done"
+                onSubmitEditing={() => console.log('done')}
                 style={styles.Information_Input}
                 lable={'TPM'}
                 value={
-                  modal_T == 'Warp'
+                  modal_T === 'Warp'
                     ? isNaN(parseFloat(Warp_Data.tpm))
                       ? ''
                       : Warp_Data.tpm == '0.00'
@@ -686,7 +797,7 @@ const YarnModal = ({
                     : Weft_Data.tpm.toString()
                 }
                 setValue={
-                  modal_T == 'Warp'
+                  modal_T === 'Warp'
                     ? text => {
                         if (text === '' || DecimalNum.test(text)) {
                           setWarp_data({
@@ -716,12 +827,13 @@ const YarnModal = ({
                 height: height / 15,
                 borderRadius: 10,
                 alignItems: 'center',
+                opacity: isDisable ? 0.5 : 1,
                 justifyContent: 'center',
-                backgroundColor: isDisable
-                  ? 'rgba(232, 158, 70, 0.6)'
-                  : 'rgba(232, 158, 70, 1)',
+                backgroundColor: Yellow,
               }}>
-              <Text style={{color: 'white'}}>Done</Text>
+              <Text style={{color: White, fontSize: 18, ...styleText.bold}}>
+                Done
+              </Text>
             </TouchableOpacity>
             {Yarn_Modal()}
           </View>
@@ -734,7 +846,7 @@ const YarnModal = ({
 export default YarnModal;
 
 const styles = StyleSheet.create({
-  Information_Input : {
-    marginHorizontal: width/35
-  }
+  Information_Input: {
+    marginHorizontal: width / 35,
+  },
 });

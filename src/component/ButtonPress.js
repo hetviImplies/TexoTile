@@ -1,11 +1,13 @@
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Dimensions, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import { styleText } from '../assets/fonts/Fonts'
+import { hp, wp } from '../Global_Com/responsiveScreen'
+import { White, Yellow } from '../Global_Com/color'
 const {height,width}=Dimensions.get("window")
-const ButtonPress = ({title,func}) => {
+const ButtonPress = ({title,func,isDisable}) => {
   return (
-    <TouchableOpacity onPress={func} style={{height:height/15,width:"90%",alignSelf:"center",bottom:10,borderRadius:15,alignItems:"center",justifyContent:"center",backgroundColor:"#E89E46",position:"absolute",borderWidth:0}}>
-        <Text style={{color:'white',fontSize:16,...styleText.medium,fontWeight:"800"}}>{title}</Text>
+    <TouchableOpacity disabled={isDisable} onPress={func} style={{width:"90%",alignSelf:"center",bottom:hp(1.5),borderRadius:15,alignItems:"center",justifyContent:"center",paddingVertical:"4%",backgroundColor:Yellow,position:"absolute",borderWidth:0}}>
+        <Text style={{color:White,fontSize:wp(4.8),...styleText.medium}}>{title}</Text>
       </TouchableOpacity>
   )
 }

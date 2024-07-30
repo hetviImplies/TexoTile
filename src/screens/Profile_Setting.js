@@ -1,89 +1,212 @@
-import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import Profile_com from '../component/Profile_com'
-import Save from '../assets/svgs/Save';
-import LeftArrow from '../assets/svgs/LeftArrow';
+import {
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import Profile_com from '../component/Profile_com';
 import ButtonPress from '../component/ButtonPress';
-import { useDispatch } from 'react-redux';
-import { GetUser, UpdateUserAuth } from '../Slice/LoginAuthSlice';
-const {height, width} = Dimensions.get('window');
-const Profile_Setting = (props) => {
-    const [first,setFirst]=useState()
-    const [second,setSecond]=useState()
-    const [third,setThird]=useState()
+import {useDispatch} from 'react-redux';
+import {GetUser, UpdateUserAuth} from '../Slice/LoginAuthSlice';
+import {Black, Red, White, Yellow} from '../Global_Com/color';
+import AppConstant from '../Utils/AppConstant';
+import {useFocusEffect} from '@react-navigation/native';
+import {styleText} from '../assets/fonts/Fonts';
+import {GlobalStyles} from '../Global_Com/Style';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {emailRegex} from '../Utils/Regex';
+import Activity_Indicator from '../component/Activity_Indicator';
+import Toast from '../../Toast';
+import {LeftArrow, Yarn_Logo} from '../assets/svgs/svg';
 
-    const dispatch=useDispatch()
-    const{data}=props.route.params;
-    useEffect(()=>{
-        if(data.first=="Name"){
-            dispatch(GetUser()).then((a)=>{
-                setFirst(a.payload.result.name)
-                setSecond(a.payload.result.mobile_number)
-                setThird(a.payload.result.email)
-            })
-        }else{
-            dispatch(GetUser()).then((a)=>{
-                setFirst(a.payload.result.company.code)
-                setSecond(a.payload.result.company.name)
-            })
-        }
-    },[data])
+const Profile_Setting = props => {
+  const [first, setFirst] = useState();
+  const [second, setSecond] = useState();
+  const [third, setThird] = useState();
+  const [error,setError]=useState(false)
+  console.log('error: ', error);
+  const [EmailError, setEmailError] = useState();
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const {data, setData} = props.route.params;
+  const toastRef = useRef();
+  useFocusEffect(
+    useCallback(() => {
+      setEmailError(false);
+      setFirst(setData.firstInput);
+      setSecond(setData.secondInput);
+      setThird(setData.thirdInput);
+    }, [data, setData]),
+  );
 
-    const HandlePress=()=>{
-        if(data.first=="Name"){
-            const obj={
-                name : first,
-                email : third
+  const handleError = useCallback(
+    message => {
+      toastRef.current.error(message);
+      toastRef.current.Height(-StatusBar.currentHeight + wp(4));
+    },
+    [toastRef],
+  );
+
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      headerLeft: () => {
+        return (
+          <View>
+            <Toast ref={toastRef} />
+            <View
+              style={{
+                paddingLeft: '5%',
+                flexDirection: 'row',
+                borderWidth: 0,
+                width: wp(100),
+                alignItems: 'center',
+              }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setLoading(true)
+                  props.navigation.goBack();
+                  setLoading(false)
+                }}>
+                <LeftArrow />
+              </TouchableOpacity>
+              <Text
+                style={{
+                  ...styleText.bold,
+                  fontSize: 20,
+                  color: White,
+                  marginLeft: data.first === 'Name' ? '33%' : '23%',
+                }}>
+                {data.first === 'Name' ? AppConstant.Account : 'Company Detail'}
+              </Text>
+            </View>
+          </View>
+        );
+      },
+    });
+  }, [props.navigation]);
+
+  const HandlePress = async () => {
+    try {
+      if (data.first == AppConstant.Name) {
+        if (EmailError === false) {
+          setLoading(true);
+          const obj = {
+            name: first,
+            email: third,
+          };
+          await dispatch(UpdateUserAuth(JSON.stringify(obj))).then(a => {
+            if (a.payload.error === false) {
+              setLoading(false);
+              props.navigation.goBack();
+            } else {
+              setLoading(false);
+              handleError(a.payload.message);
             }
-                dispatch(UpdateUserAuth(JSON.stringify(obj))).then((a)=>{
-                    console.log(a.meta);
-                    if(a.meta.requestStatus=="fulfilled"){
-                        return props.navigation.goBack()
-                    }
-                })
-        }else{
-            return props.navigation.goBack()
+          });
         }
+      } else {
+        props.navigation.goBack();
+      }
+    } catch (error) {
+      handleError(error.message);
     }
+  };
 
+  useEffect(() => {
+    if (
+      (third === '' && data.Third !== 'Company Address') ||
+      data.Third === 'Company Address'
+    ) {
+      setEmailError(false);
+      setError(false)
+    } else {
+      const isValidEmail = emailRegex.test(third?.trim());
+      setEmailError(!isValidEmail);
+      setError(first==='')
+    }
+  }, [third,first]);
   return (
-    <View style={{backgroundColor:"white",flex:1}}>
-        <View style={styles.header}>
-        <View style={styles.header_container}>
-          <TouchableOpacity onPress={()=>props.navigation.goBack()}>
-            <LeftArrow color={"white"}/>
-          </TouchableOpacity>
-          <Text style={{color: 'white', fontSize: 20, fontWeight: '600'}}>
-            Account
+    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+      <KeyboardAvoidingView
+        keyboardVerticalOffset={-hp(5)}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={GlobalStyles.ContainerWithoutJustifty}>
+        {loading ? <Activity_Indicator /> : null}
+
+        <Profile_com
+          email={{borderColor: error ? Red : White, borderWidth: 1}}
+          title={data.first}
+          value={first}
+          setvalue={setFirst}
+          disable={data.first == AppConstant.Name ? true : false}
+          placeholder={
+            data.first === AppConstant.Name
+              ? AppConstant.EnterName
+              : AppConstant.EnterCode
+          }
+        />
+        {error ? (
+          <Text
+            style={{
+              color: Red,
+              alignSelf: 'flex-end',
+              marginTop: '2%',
+              marginRight: '5%',
+            }}>
+            Name is required
           </Text>
-          <View></View>
-        </View>
-      </View>
-      <Profile_com style={{color:"rgba(45, 48, 61, 0.3)"}} title={data.first} value={first} setvalue={setFirst} disable={data.first=="Name" ? true : false}/>
-      <Profile_com style={{color:"rgba(45, 48, 61, 0.3)"}} title={data.Second} value={second} setvalue={setSecond} disable={false}/>
-      <Profile_com style={{color:"rgba(86, 90, 112, 1)"}} title={data.Third} value={third} setvalue={setThird} disable={true} placeholder={data.first=="Name" ? "Enter Email (optional)" : "Enter Address"}/>
-      <ButtonPress title={"Save"} func={HandlePress}/>
-    </View>
-  )
-}
+        ) : null}
+        <Profile_com
+          title={data.Second}
+          value={second}
+          setvalue={setSecond}
+          disable={false}
+          placeholder={
+            data.first === AppConstant.Name
+              ? AppConstant.Enter_Phone_Number
+              : AppConstant.Enter_Company_Name
+          }
+        />
+        <Profile_com
+          email={{borderColor: EmailError ? Red : White, borderWidth: 1}}
+          title={data.Third}
+          value={third}
+          setvalue={setThird}
+          disable={true}
+          placeholder={
+            data.first === AppConstant.Name
+              ? 'Enter Email (optional)'
+              : AppConstant.EnterAddress
+          }
+        />
+        {EmailError ? (
+          <Text
+            style={{
+              color: Red,
+              alignSelf: 'flex-end',
+              marginTop: '2%',
+              marginRight: '5%',
+            }}>
+            Invalid email
+          </Text>
+        ) : null}
 
-export default Profile_Setting
+        <ButtonPress title={AppConstant.Save} func={HandlePress} />
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
+  );
+};
 
-const styles = StyleSheet.create({
-    header: {
-        height: height / 14,
-        backgroundColor: '#E89E46',
-        justifyContent:"center"
-      },
-      header_container: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginHorizontal: '4%'
-      },
-      shadow: {
-        shadowOffset: {width: 4, height: 0},
-        shadowOpacity: 1,
-        shadowRadius: 1,
-        elevation: 5,
-      },
-})
+export default Profile_Setting;

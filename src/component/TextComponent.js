@@ -3,10 +3,12 @@ import React from 'react';
 import { isNativePlatformSupported } from 'react-native-screens/lib/typescript/core';
 const {height, width} = Dimensions.get('window');
 import { styleText } from '../assets/fonts/Fonts';
+import { hp, normalize } from '../Global_Com/responsiveScreen';
+import { Black, Grey } from '../Global_Com/color';
 const TextComponent = ({main, sub}) => {
   return (
     <View>
-      <View style={{borderWidth: 0, width: 182}}>
+      <View style={{borderWidth: 0, maxWidth: hp(30)}}>
         <Text style={styles.maintext}>{main}</Text>
       </View>
       <Text style={styles.subtext}>{sub}</Text>
@@ -18,17 +20,17 @@ export default TextComponent;
 
 const styles = StyleSheet.create({
   maintext: {
-    fontSize: 24,
-    color: '#2D303D',
+    fontSize: hp(3.3),
+    color: Black,
     ...styleText.bold,
-    lineHeight:33
+    lineHeight:hp(4)
   },
   subtext: {
-    fontSize: 16,
-    color: '#565A70',
+    fontSize: hp(2),
+    color: Grey,
     opacity: 0.5,
     ...styleText.medium,
-    lineHeight:18,
+    lineHeight:hp(3),
     marginTop:"2%"
   },
 });

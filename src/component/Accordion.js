@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Checkbox} from 'react-native-paper';
+import React, {useEffect, useRef, useState} from 'react';
 import CheckBox from '@react-native-community/checkbox';
-import Down_arrow from '../assets/svgs/Down_arrow';
-import Mesh from '../assets/svgs/Mesh';
+
 import CardView from './CardView';
 import { isDate } from 'moment';
+import { hp, wp } from '../Global_Com/responsiveScreen';
+import { Black, White, Yellow } from '../Global_Com/color';
+import { Down_Arrow, Up_Arrow } from '../assets/svgs/svg';
 
 const {height, width} = Dimensions.get('window');
 const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
@@ -30,54 +31,49 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
   const [weft_Data,setWeft_Data]=useState([])
   const [isWarpUndefine,setIsWarpUndefine]=useState(false)
   const [isWeftUndefine,setIsWeftUndefine]=useState(false)
+  const animatedHeight = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const warp = data.warp_data.filter((item) => item.yarn.id === id);
+    const weft = data.weft_data.filter((item) => item.yarn.id === id);
+    setWarp_Data(warp);
+    setWeft_Data(weft);
+  }, [id, data]);
+
   const Toggle = () => {
-    if (!show) {
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    } else {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: false,
-      }).start();
-    }
     setShow(!show);
+    Animated.timing(animatedHeight, {
+      toValue: show ? 34 : 200,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
   };
 
-  const interpolation = animation.interpolate({
+  const interpolation = animatedHeight.interpolate({
     inputRange: [0, 1],
-    outputRange: [34, warp_Data.length>0 &&weft_Data.length>0 ?395:210],
-
+    outputRange: [34, 10],
   });
-  useEffect(()=>{
-      const warp=data.warp_data.filter((item)=>item.yarn.id==id)
-      const weft=data.weft_data.filter((item)=>item.yarn.id==id)
-  setWarp_Data(warp)
-  setWeft_Data(weft)
-  },[id,data])
+
   return (
     <View style={{}}>
       <Animated.View
-        style={[styles.AnimatedView,{height: interpolation,}]}>
+        style={[styles.AnimatedView,{height: interpolation}]}>
         <View style={{flexDirection: 'row'}}>
-          <View style={{flexDirection: 'column', flexGrow: 1}}>
+          <View style={{flexDirection: 'column', flexGrow: 1,justifyContent:""}}>
             <TouchableOpacity
               onPress={Toggle}
               style={{flexDirection: 'row', borderWidth: 0}}>
               <CheckBox
-                tintColors={{true : '#E89E46'}}
+                tintColors={{true : Yellow}}
                 value={checkedItems.includes(data.id)}
                 onValueChange={() => toggleCheckbox(data.id)}
               />
               <Text
                 style={{
-                  color: '#2D303D',
-                  fontSize: 15,
+                  color: Black,
+                  fontSize: wp(3.8),
                   marginLeft: '2%',
-                  marginTop: '1.2%',
+                  marginTop:"1.3%"
                 }}>
                 {data.name}
               </Text>
@@ -86,25 +82,26 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   borderWidth: 0,
                   alignItems: 'flex-end',
                   flexGrow: 1,
-                  marginTop: '1.2%',
-                  height: height / 34,
+                  height: hp(3),
+                  marginTop:"1%"
                 }}>
                 <View
                   style={{
                     borderWidth: 0,
                     flexDirection: 'row',
                     marginRight: '2%',
-                    height: '80%',
+                    height: wp(6.5),
+                    alignItems:"center"
                   }}>
-                  <Text style={{color: '#2D303D'}}>Kg : {data.weight}</Text>
+                  <Text style={{color: Black,fontSize: wp(3.3)}}>Kg : {data.weight}</Text>
                   <View
                     style={{
-                      borderWidth: 0.6,
+                      borderRightWidth:1,
                       marginHorizontal: '4%',
                       borderColor: 'grey',
                       height: height / 35,
                     }}></View>
-                  <Text style={{color: '#2D303D'}}>
+                  <Text style={{color: Black}}>
                     ₹ : {data.quality_cost}
                   </Text>
                   <View
@@ -114,7 +111,9 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                       height: height / 35,
                       marginLeft: '1.5%',
                     }}>
-                    <Down_arrow />
+                    {
+                    show ? <Up_Arrow/>  :  <Down_Arrow />
+                    }
                   </View>
                 </View>
               </View>
@@ -182,12 +181,12 @@ export default Accordion;
 const styles = StyleSheet.create({
   AnimatedView:{
 borderWidth: 0,
-    backgroundColor: 'white',
+    backgroundColor: White,
     marginHorizontal: '5%',
     marginTop: '2%',
     borderRadius: 10,
     shadowColor: '#000',
-    backgroundColor: 'white',
+    backgroundColor: White,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.8,
     shadowRadius: 1,

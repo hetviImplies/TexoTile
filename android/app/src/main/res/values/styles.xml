@@ -4,6 +4,17 @@
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <item name="android:windowAnimationStyle">@style/FadeAnimation</item>
+        <item name="android:windowDisablePreview">true</item>
     </style>
 
+    <style name="BootTheme" parent="Theme.BootSplash">
+        <item name="android:windowBackground">@drawable/img</item>
+        <item name="android:windowDisablePreview">true</item>
+
+    </style>
+
+    <style name="FadeAnimation">
+        <item name="android:windowExitAnimation">@anim/fade_out</item>
+    </style>
 </resources>

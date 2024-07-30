@@ -3,13 +3,18 @@ import React, {useState} from 'react';
 import {styleText} from '../assets/fonts/Fonts';
 import RadioButtons from './RadioButton';
 import { useDispatch } from 'react-redux';
+import { Black, Transparent, White, Yellow } from '../Global_Com/color';
 
 const {height, width} = Dimensions.get('window');
 const Proceed_Request_Modal = ({visible, setVisible , checked , setChecked ,func}) => {
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
-      <TouchableOpacity activeOpacity={1} onPress={()=> setVisible(false)} style={styles.backgroundColor}>
-        <View style={styles.modalContent}>
+      <TouchableOpacity  activeOpacity={1} onPress={()=> {
+        setVisible(false)
+        setChecked('')
+        }} style={styles.backgroundColor}>
+        <TouchableOpacity activeOpacity={1}
+          onPress={() => null} style={styles.modalContent}>
           {/* Text component */}
           <Text style={[styles.modalText, styleText.bold]}>
             What permission do you want to assign to this user?
@@ -32,10 +37,10 @@ const Proceed_Request_Modal = ({visible, setVisible , checked , setChecked ,func
               onPress={() => setChecked('Admin')}
             />
           </View>
-          <TouchableOpacity disabled={checked!='' ? false : true} onPress={func} style={{height:height/14,width:width/1.3,backgroundColor:"#E89E46",borderRadius:15,alignItems:"center",justifyContent:"center"}}>
-            <Text style={{color:"white",...styleText.semiBold,fontSize:19}}>Assign</Text>
+          <TouchableOpacity disabled={checked!='' ? false : true} onPress={func} style={{height:height/14,width:width/1.3,backgroundColor:Yellow,borderRadius:15,alignItems:"center",justifyContent:"center"}}>
+            <Text style={{color:White,...styleText.semiBold,fontSize:19}}>Assign</Text>
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       </TouchableOpacity>
     </Modal>
   );
@@ -48,14 +53,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: Transparent,
   },
   modalContent: {
     height: height / 2.4, // Adjust the height of the modal content as needed
     width: width,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    backgroundColor: 'white',
+    backgroundColor: White,
     paddingHorizontal: '8%',
     flexDirection: 'column',
     alignItems: 'center', // Center content vertically
@@ -66,7 +71,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center', // Center text horizontally
     flexWrap: 'wrap', // Allow text wrapping
-    color: 'rgba(45, 48, 61, 1)',
+    color: Black,
     lineHeight: 30,
   },
 });

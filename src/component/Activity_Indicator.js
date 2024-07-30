@@ -1,6 +1,7 @@
 import { ActivityIndicator, Dimensions, Modal, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-const {height,width}=Dimensions.get("window")
+import { White } from '../Global_Com/color'
+import { hp } from '../Global_Com/responsiveScreen'
 const Activity_Indicator = () => {
   return (
     <Modal
@@ -9,7 +10,7 @@ const Activity_Indicator = () => {
       animationType="none"
     >
       <View style={styles.backgroundColor}>
-        <ActivityIndicator size={40} color={"white"} />
+        <ActivityIndicator size={40} color={White} />
       </View>
     </Modal>
   )
@@ -19,9 +20,9 @@ export default Activity_Indicator
 
 const styles = StyleSheet.create({
     backgroundColor: {
-    height:height,
+    height:hp(100),
     alignItems: 'center',
     justifyContent: "center",
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
 })

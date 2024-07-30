@@ -5,67 +5,62 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Yarn from '../screens/Yarn';
 import Quality from '../screens/Quality';
 import User from '../screens/User';
 import Settings from '../screens/Settings';
-import QualityLogo from '../assets/svgs/QualityLogo';
-import Vector from '../assets/svgs/Vector';
-import Profile from '../assets/svgs/Profile';
-import YarnLogo from '../assets/svgs/YarnLogo';
-import SettingsLogo from '../assets/svgs/SettingsLogo';
-import Point from '../assets/svgs/Point';
-import Search from '../assets/svgs/Search';
-import Logo from '../assets/svgs/Logo';
-import Add from '../assets/svgs/Add';
-import Header_logo from '../assets/svgs/Header_logo';
-import { styleText } from '../assets/fonts/Fonts';
+import {styleText} from '../assets/fonts/Fonts';
 
 const Tab = createBottomTabNavigator();
 const {height, weight} = Dimensions.get('window');
-import { URL } from '../URLs/URL';
-import { EndPoints } from '../URLs/EndPoints';
+import {URL} from '../URLs/URL';
+import {EndPoints} from '../URLs/EndPoints';
 import axios from 'axios';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
+import { Profile_Black, Profile_Yellow, QualityLogo, QualityLogo_Black, QualityLogo_Yellow, Setting_Black, Setting_Yellow, Union, Yarn_Black, Yarn_Logo, Yarn_Yellow } from '../assets/svgs/svg';
+import { ConditionContext } from '../screens/ConditionContext';
+import { hp, wp } from '../Global_Com/responsiveScreen';
+import { Black, White, Yellow } from '../Global_Com/color';
 const options = {
   tabBarStyle: {
-    height: height / 9,
-    shadowColor: '#000',
-    backgroundColor: 'white',
+    height: hp(11),
+    shadowColor: Black,
+    backgroundColor: White,
+
   },
+  keyboardVerticalOffset : 100
 };
-const Tabs = () => {
-  const [isWriter,setIsWriter]=useState(null)
-
-useFocusEffect(
+const Tabs = (props) => {
+  const { condition,setCondition } = useContext(ConditionContext);
+  useFocusEffect(
     useCallback(() => {
-        const response = axios.get(`${URL}${EndPoints.GetProfile}`).then((response)=>{
-          setIsWriter(response.data?.result.role);
-        })
-    }, []))
-
+      const response = axios.get(`${URL}${EndPoints.GetProfile}`).then((res)=>{
+        setCondition(res.data.result.role);
+      })
+    }, [])
+  );
   return (
-
     <Tab.Navigator screenOptions={options} initialRouteName="Quality">
       <Tab.Screen
         options={{
-          headerShown:true,
+          headerShown: true,
           tabBarShowLabel: false,
           headerTitleAlign: 'center',
           title: 'Quality',
-          tabBarLabelStyle:{
-            ...styleText.regular
+          tabBarLabelStyle: {
+            ...styleText.regular,
           },
           headerBackgroundContainerStyle: {
-            backgroundColor: '#E89E46',
+            backgroundColor: Yellow,
           },
-          headerTintColor: '#ffffff',
+          headerTintColor: White,
           headerTitleStyle: {
-            fontWeight: 'bold',
+            ...styleText.bold,
           },
           headerBackground: () => {},
+
           tabBarIcon: ({color, focused}) => {
             return (
               <View
@@ -74,8 +69,8 @@ useFocusEffect(
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute'}}>
-                  {focused ? <Point /> : null}
+                <View style={{position: 'absolute',top:-2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
                 </View>
                 <View
                   style={{
@@ -84,8 +79,10 @@ useFocusEffect(
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                  <QualityLogo stroke={focused ? '#E89E46' : 'black'} />
-                  <Text style={{color: focused ? '#E89E46' : 'black'}}>
+                  {
+                    focused ? <QualityLogo_Yellow height={hp(4.2)} width={hp(4.2)}/> : <QualityLogo_Black height={hp(4.2)} width={hp(4.2)}/>
+                  }
+                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
                     Quality
                   </Text>
                 </View>
@@ -95,20 +92,66 @@ useFocusEffect(
         }}
         name="Quality"
         component={Quality}
-      />{ (isWriter=="writer" || isWriter=="root" || isWriter=="admin") ?
+      />
+      {
+        (condition === 'root' || condition === 'admin')
+       ? (
+        <Tab.Screen
+          options={{
+            tabBarShowLabel: false,
+
+            headerBackgroundContainerStyle: {
+              backgroundColor: Yellow,
+            },
+            headerShown: true,
+
+            headerBackground: () => {},
+            tabBarIcon: ({color, focused}) => {
+              return (
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    flexDirection: 'column',
+                  }}>
+                  <View style={{position: 'absolute',top:-2}}>
+                    {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
+                  </View>
+                  <View
+                    style={{
+                      top: '30%',
+                      justifyContent: 'center',
+                      position: 'absolute',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}>
+                    {
+                    focused ? <Profile_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Profile_Black  height={hp(4.2)} width={hp(4.2)}/>
+                  }
+                    <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
+                      User
+                    </Text>
+                  </View>
+                </View>
+              );
+            },
+          }}
+          name="User"
+          component={User}
+        />
+      ) : null}
       <Tab.Screen
         options={{
+          headerShown: true,
           tabBarShowLabel: false,
           headerTitleAlign: 'center',
-          title: 'User',
+          title: 'Yarn',
           headerBackgroundContainerStyle: {
-            backgroundColor: '#E89E46',
-            zIndex:0,
+            backgroundColor: Yellow,
           },
-          headerShown:true,
-          headerTintColor: '#ffffff',
+          headerTintColor: White,
           headerTitleStyle: {
-            fontWeight: 'bold',
+            ...styleText.bold,
           },
           headerBackground: () => {},
           tabBarIcon: ({color, focused}) => {
@@ -119,56 +162,8 @@ useFocusEffect(
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute'}}>
-                  {focused ? <Point /> : null}
-                </View>
-                <View
-                  style={{
-                    top: '30%',
-                    justifyContent: 'center',
-                    position: 'absolute',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                  }}>
-                  <Profile stroke={focused ? '#E89E46' : 'black'} />
-                  <Text style={{color: focused ? '#E89E46' : 'black'}}>
-                    User
-                  </Text>
-                </View>
-              </View>
-            );
-          },
-        }}
-        name="User"
-        component={User}
-      /> : null}
-      <Tab.Screen
-        options={{
-          headerShown: true,
-          tabBarShowLabel: false,
-          headerTitleAlign: 'center',
-          title: 'Yarn',
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#E89E46',
-            zIndex:0,
-          },
-          headerTintColor: '#ffffff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-          headerBackground: () => {
-
-          },
-          tabBarIcon: ({color, focused}) => {
-            return (
-              <View
-                style={{
-                  flex: 1,
-                  alignItems: 'center',
-                  flexDirection: 'column',
-                }}>
-                <View style={{position: 'absolute'}}>
-                  {focused ? <Point /> : null}
+                <View style={{position: 'absolute',top:-2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
                 </View>
                 <View
                   style={{
@@ -177,8 +172,10 @@ useFocusEffect(
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                  <YarnLogo stroke={focused ? '#E89E46' : 'black'} />
-                  <Text style={{color: focused ? '#E89E46' : 'black'}}>
+                 {
+                    focused ? <Yarn_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Yarn_Black  height={hp(4.2)} width={hp(4.2)}/>
+                  }
+                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
                     Yarn
                   </Text>
                 </View>
@@ -194,14 +191,19 @@ useFocusEffect(
           tabBarShowLabel: false,
           title: 'Setting',
           headerBackgroundContainerStyle: {
-            backgroundColor: '#E89E46',
-            zIndex:0,
+            backgroundColor: Yellow,
+            zIndex: 0,
           },
-          headerTintColor: '#FFFFFF',
+          headerTintColor: White,
           headerTitleAlign: 'center',
           headerTitleStyle: {
-            fontWeight: 'bold',
+            ...styleText.bold,
           },
+          headerLeft: () => (
+            <View style={{marginLeft: '13%'}}>
+             <Yarn_Logo height={hp(9)} width={wp(9)} />
+            </View>
+          ),
           headerBackground: () => {},
           tabBarIcon: ({color, focused}) => {
             return (
@@ -211,8 +213,8 @@ useFocusEffect(
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute'}}>
-                  {focused ? <Point /> : null}
+                <View style={{position: 'absolute',top:-2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
                 </View>
                 <View
                   style={{
@@ -221,8 +223,10 @@ useFocusEffect(
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                  <SettingsLogo stroke={focused ? '#E89E46' : 'black'} />
-                  <Text style={{color: focused ? '#E89E46' : 'black'}}>
+                  {
+                    focused ? <Setting_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Setting_Black  height={hp(4.2)} width={hp(4.2)}/>
+                  }
+                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
                     Settings
                   </Text>
                 </View>

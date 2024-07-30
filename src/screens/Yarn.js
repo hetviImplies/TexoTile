@@ -3,6 +3,7 @@ import {
   Dimensions,
   LogBox,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -11,53 +12,69 @@ import {
 } from 'react-native';
 import React, {
   useCallback,
+  useContext,
   useDebugValue,
   useEffect,
   useLayoutEffect,
+  useRef,
   useState,
 } from 'react';
-import DataNot from '../assets/svgs/DataNot';
 import DataNotFound from '../component/DataNotFound';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   AddYarnData,
   GetYarnActivity,
   GetYarnData,
+  GetYarnQualityData,
   SearchData,
 } from '../Slice/YarnSlice';
-import Edit from '../assets/svgs/Edit';
-import Recent from '../assets/svgs/Recent';
 import AddYarnModal from '../component/Add_Yarn_Modal';
-import Add from '../assets/svgs/Add';
+
 import Yarn_activity from '../component/Yarn_activity_modal';
-import Search from '../assets/svgs/Search';
+
 import SeachBar from '../component/SeachBar';
 import axios from 'axios';
-import { URL } from '../URLs/URL';
-import { EndPoints } from '../URLs/EndPoints';
-import { useFocusEffect } from '@react-navigation/native';
+import {URL} from '../URLs/URL';
+import {EndPoints} from '../URLs/EndPoints';
+import {useFocusEffect} from '@react-navigation/native';
+import Activity_Indicator from '../component/Activity_Indicator';
+import {styleText} from '../assets/fonts/Fonts';
+import {
+  Add_White,
+  Edit_Logo,
+  History_Logo,
+  Yarn_Logo,
+} from '../assets/svgs/svg';
+import {ConditionContext} from './ConditionContext';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {Black, Red, White} from '../Global_Com/color';
+import screens from '../constants/screens';
+import Toast from '../../Toast';
+import AppConstant from '../Utils/AppConstant';
 const {height, width} = Dimensions.get('window');
 const Yarn = ({navigation}) => {
   const dispatch = useDispatch();
+  const {condition} = useContext(ConditionContext);
   const [YarnData, setYarnData] = useState(null);
-  const [search, setSearch] = useState();
+  const [search, setSearch] = useState(undefined);
   const [YarnName, setYarnName] = useState();
   const [YarnRate, setYarnRate] = useState();
   const Yarndata = useSelector(state => state.Yarn.YarnData);
   const YarnPending = useSelector(state => state.Yarn.YarnPending);
+  const YarnOldDt = useSelector(state => state.Yarn.YarnOldDt);
   const [showYarnModal, setShowYarnModal] = useState(false);
-  const [yarn_activity, setYarn_activity] = useState();
   const [showYarnActivityModal, setShowYarnActivityModal] = useState(false);
-  const [isRole,setIsRole]=useState()
-
-
-
+  const [loading, setLoading] = useState(false);
+  const toastRef = useRef(null);
   useFocusEffect(
     useCallback(() => {
-      const response = axios.get(`${URL}${EndPoints.GetProfile}`).then((res)=>{
-        setIsRole(res.data.result.role)
-      })
-    }, [])
+      try {
+        setSearch(null);
+        dispatch(GetYarnData());
+      } catch (error) {
+        handleError(error.message);
+      }
+    }, []),
   );
 
   useEffect(() => {
@@ -69,52 +86,96 @@ const Yarn = ({navigation}) => {
   }, [search]);
 
   useLayoutEffect(() => {
-    if(Yarndata?.length > 0 && isRole !== "view"){
+    if (Yarndata?.length > 0 && condition !== 'view' && condition !== null) {
       navigation.setOptions({
         headerRight: () => (
-          <TouchableOpacity
-            style={{marginRight: '15%'}}
-            onPress={() => setShowYarnModal(true)}>
-            <Add  big={true} color={'white'}/>
-          </TouchableOpacity>
+          <View style={{width: wp(100)}}>
+            <Toast ref={toastRef} />
+            <TouchableOpacity
+              style={{marginLeft: wp(87)}}
+              onPress={() => setShowYarnModal(true)}>
+              <Add_White height={hp(7)} width={wp(7)} />
+            </TouchableOpacity>
+          </View>
+        ),
+        headerLeft: () => (
+          <View style={{marginLeft: '12%'}}>
+            <Yarn_Logo height={hp(9)} width={wp(9)} />
+          </View>
         ),
       });
     } else {
       navigation.setOptions({
-        headerRight: null,
+        headerRight: () => <Toast ref={toastRef} />,
+        headerLeft: () => (
+          <View style={{marginLeft: '12%'}}>
+            <Yarn_Logo height={hp(9)} width={wp(9)} />
+          </View>
+        ),
       });
     }
-  }, [navigation, Yarndata, isRole]);
-  console.log(isRole,'=================================isRole from yaarne');
+  }, [navigation, Yarndata, condition]);
 
   const OpenYarnActivity = () => {
     return (
       <Yarn_activity
         show={showYarnActivityModal}
         setShow={setShowYarnActivityModal}
-        data={yarn_activity}
       />
     );
   };
 
+  const handleError = useCallback(
+    message => {
+      toastRef.current.error(message);
+      toastRef.current.Height(-StatusBar.currentHeight);
+    },
+    [toastRef],
+  );
+
   const OpenModal = () => {
     return (
       <AddYarnModal
-        func={() => {
-          dispatch(
-            AddYarnData({
-              name: YarnName,
-              rate: YarnRate,
-            }),
-          ).then(a => {
-            if (a.meta.requestStatus == 'fulfilled') {
-              setYarnName('');
-              setYarnRate('');
-              setShowYarnModal(false);
-              dispatch(GetYarnData());
-            }
-          });
+        func={async () => {
+          setLoading(true);
+          try {
+            await dispatch(
+              AddYarnData({
+                name: YarnName?.trim(),
+                rate: YarnRate,
+              }),
+            ).then(a => {
+              if (a.meta.requestStatus !== 'rejected') {
+                if (a.payload.error === false) {
+                  setLoading(false);
+                  setYarnName('');
+                  setYarnRate('');
+                  setShowYarnModal(false);
+                  dispatch(GetYarnData());
+                  if (typeof a.payload === 'string') {
+                    handleError(a.payload.message);
+                  }
+                } else {
+                  setLoading(false);
+                  setYarnName('');
+                  setYarnRate('');
+                  setShowYarnModal(false);
+                  handleError(a.payload.message);
+                }
+              } else {
+                handleError(a.payload.message);
+              }
+            });
+          } catch (error) {
+            setLoading(false);
+            setYarnName('');
+            setYarnRate('');
+            setShowYarnModal(false);
+            handleError(error.message);
+          }
         }}
+        setLoading={setLoading}
+        loading={loading}
         value={showYarnModal}
         setValue={setShowYarnModal}
         setName={setYarnName}
@@ -125,8 +186,12 @@ const Yarn = ({navigation}) => {
     );
   };
   useEffect(() => {
-    dispatch(GetYarnData());
-  }, []);
+    try {
+      dispatch(GetYarnData());
+    } catch (error) {
+      handleError(error.message);
+    }
+  }, [DisplayData]);
 
   const DisplayData = () => {
     return (
@@ -134,11 +199,13 @@ const Yarn = ({navigation}) => {
         <View style={{borderWidth: 0, marginHorizontal: '4%', marginTop: '3%'}}>
           <View style={{flexDirection: 'row'}}>
             <Text style={styles.text_heading}>Yarn Name</Text>
-            <Text style={[styles.text_heading, {marginLeft: width / 5}]}>
+            <Text style={[styles.text_heading, {marginLeft: wp(17)}]}>
               Y.Rate
             </Text>
           </View>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollViewContent}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.scrollViewContent}>
             {YarnData?.map(a => {
               return (
                 <View style={{borderWidth: 0}}>
@@ -146,7 +213,7 @@ const Yarn = ({navigation}) => {
                     <View
                       style={{
                         borderWidth: 0,
-                        width: width / 3.5,
+                        width: '30%',
                         justifyContent: 'center',
                       }}>
                       <Text style={styles.sub_text}>{a.name}</Text>
@@ -156,39 +223,41 @@ const Yarn = ({navigation}) => {
                         borderWidth: 0,
                         justifyContent: 'center',
                         height: height / 18,
-                        marginLeft: width / 10,
-                        width: width / 4.5,
+                        marginLeft: wp(10.2),
+                        width: wp(25),
                       }}>
                       <Text style={styles.sub_text}>₹ {a.rate}</Text>
                     </View>
-                    {isRole!=='view' ? <View
-                      style={{
-                        flexDirection: 'row',
-                        marginLeft: width / 7,
-                        alignSelf: 'center',
-                      }}>
-                      <TouchableOpacity
-                        onPress={() =>
-                          navigation.navigate('UpdateYarn', {id: a.id})
-                        }>
-                        <Edit />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={{marginLeft: '8%'}}
-                        onPress={() => {
-                          dispatch(GetYarnActivity({id: a.id})).then(a => {
-                            setYarn_activity(a.payload);
-                          });
-                          setShowYarnActivityModal(true);
+                    {condition !== 'view' ? (
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          marginLeft: wp(10),
+                          alignSelf: 'center',
                         }}>
-                        <Recent />
-                      </TouchableOpacity>
-                    </View> : null}
+                        <TouchableOpacity
+                          onPress={async () => {
+                            await dispatch(GetYarnQualityData(a.id));
+                            navigation.navigate(screens.UpdateYarn, {data: a});
+                          }}>
+                          <Edit_Logo height={30} width={30} />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={{marginLeft: '8%'}}
+                          onPress={async () => {
+                            await dispatch(GetYarnActivity({id: a.id}));
+                            setShowYarnActivityModal(true);
+                          }}>
+                          <History_Logo height={30} width={30} />
+                        </TouchableOpacity>
+                      </View>
+                    ) : null}
                   </View>
                   <View
                     style={{
                       borderWidth: 0.7,
-                      borderColor: '#rgba(45, 48, 61, 0.1)',
+                      borderColor: Black,
+                      opacity: 0.1,
                     }}></View>
                 </View>
               );
@@ -201,19 +270,24 @@ const Yarn = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      {YarnData?.length > 0 && YarnData != null ? (
-        <SeachBar setSearch={setSearch}/>
+      {(YarnData?.length > 0 && YarnData !== null) ||
+      search ||
+      YarnOldDt?.length > 0 ? (
+        <SeachBar setSearch={setSearch} />
       ) : null}
-
+      {loading ? <Activity_Indicator /> : null}
       {YarnPending ? (
-        <ActivityIndicator size={40}  style={{marginVertical: height / 2.5}} color={"#E89E46"} />
-      ) : YarnData?.length > 0 && YarnData != null ? (
+        <Activity_Indicator />
+      ) : YarnData?.length > 0 && YarnData !== null ? (
         DisplayData()
       ) : (
-        <DataNotFound title={'Add Yarn'} func={() => setShowYarnModal(true)} />
+        <DataNotFound
+          search={search}
+          title={'Add Yarn'}
+          func={() => setShowYarnModal(true)}
+        />
       )}
       {OpenModal()}
-
       {OpenYarnActivity()}
     </View>
   );
@@ -223,7 +297,7 @@ export default Yarn;
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    backgroundColor: White,
     flex: 1,
   },
   shadow: {
@@ -234,7 +308,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: '4%',
     marginTop: '4%',
-    backgroundColor: 'white',
+    backgroundColor: White,
     marginBottom: '2%',
     paddingLeft: '13%',
     height: height / 14,
@@ -243,16 +317,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     borderWidth: 0,
     marginTop: '4%',
-    paddingBottom: '25%', // Adjust based on tab bar height
-
+    paddingBottom: hp(20),
   },
   text_heading: {
-    color: '#2D303D',
-    fontSize: 15,
-    fontWeight: '500',
+    color: Black,
+    fontSize: hp(2),
+    ...styleText.bold,
   },
   sub_text: {
-    fontSize: 14,
-    color: '#2D303D',
+    fontSize: hp(1.9),
+    color: Black,
+    ...styleText.semiBold,
   },
 });

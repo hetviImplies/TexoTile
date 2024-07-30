@@ -1,9 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Border_Color } from '../Global_Com/color'
 
 const DottedLine = ({margin}) => {
   return (
-    <View style={{borderWidth:1,borderStyle:"dashed",borderColor:"rgba(45, 48, 61, 0.1)",marginHorizontal:"3%",...margin}}></View>
+    <View style={{borderTopWidth:1,borderStyle:"dashed",borderColor:Border_Color,opacity:0.2,...margin}}></View>
   )
 }
 

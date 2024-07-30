@@ -10,6 +10,15 @@ import {
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {styleText} from '../assets/fonts/Fonts';
+import {hp} from '../Global_Com/responsiveScreen';
+import {
+  Black,
+  Grey,
+  Red,
+  Transparent,
+  White,
+  Yellow,
+} from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');
 const OpenModal = ({
   isDisable,
@@ -23,25 +32,48 @@ const OpenModal = ({
   BtnText,
   Handle,
   placeHolder,
+  modal,
 }) => {
   const [error, setError] = useState();
+  const [caperror, setCapError] = useState();
+  console.log('isDisable: ', isDisable);
+
   useEffect(() => {
-    if (value == '') {
+    if (value === '') {
       setIsDisable(true);
     } else {
       if (value.length < 2) {
         setError(true);
+        setCapError(false);
         setIsDisable(true);
       } else {
-        setError(false);
-        setIsDisable(false);
+        if (modal === 'join') {
+          if (/^[A-Z0-9]+$/.test(value)) {
+            console.log('/^[A-Z]+$/.test(value): ', /^[A-Z]+$/.test(value));
+            setCapError(false);
+            setError(false);
+            setIsDisable(false);
+          } else {
+            console.log('/^[A-Z]+$/.test(value): ', /^[A-Z]+$/.test(value));
+            setIsDisable(true);
+            setCapError(true);
+            setError(false);
+          }
+        } else {
+          setCapError(false);
+          setError(false);
+          setIsDisable(false);
+        }
       }
     }
   }, [value]);
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
       <TouchableOpacity
-        onPress={() => setVisible(false)}
+        onPress={() => {
+          setError(false);
+          setVisible(false);
+        }}
         style={styles.backgroundColor}>
         <TouchableOpacity
           activeOpacity={1}
@@ -50,13 +82,20 @@ const OpenModal = ({
           <Text style={styles.mainText}>{mainText}</Text>
           <Text style={styles.subText}>{subText}</Text>
           <TextInput
+            selectionColor={Yellow}
             onChangeText={setFunc}
             placeholder={placeHolder}
             style={styles.TextInput}></TextInput>
           {error ? (
             <Text
-              style={{color: 'red', alignSelf: 'flex-end', paddingRight: '7%'}}>
+              style={{color: Red, alignSelf: 'flex-end', paddingRight: '7%'}}>
               Enter atleast two characters
+            </Text>
+          ) : null}
+          {caperror ? (
+            <Text
+              style={{color: Red, alignSelf: 'flex-end', paddingRight: '7%'}}>
+              Code must be Uppercase
             </Text>
           ) : null}
           <TouchableOpacity
@@ -65,9 +104,8 @@ const OpenModal = ({
             style={[
               styles.btn,
               {
-                backgroundColor: isDisable
-                  ? ' rgba(232, 158, 70, 0.5)'
-                  : '#E89E46',
+                opacity: isDisable ? 0.5 : 1,
+                backgroundColor: Yellow,
               },
             ]}>
             <Text style={styles.btnText}>{BtnText}</Text>
@@ -88,7 +126,7 @@ const styles = StyleSheet.create({
     marginTop: '4%',
     borderRadius: 15,
     width: '90%',
-    borderColor: '#E89E46',
+    borderColor: Yellow,
     backgroundColor: '#FFFAF3',
     justifyContent: 'center',
     marginHorizontal: '3%',
@@ -100,37 +138,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: '3%',
-
   },
   btnText: {
-    color: 'white',
-    fontSize:16,
-    ...styleText.medium
+    color: White,
+    fontSize: 16,
+    ...styleText.medium,
   },
   mainText: {
-    color: 'black',
-    fontSize: 16,
+    color: Black,
+    fontSize: hp(2),
     marginTop: '5%',
-    lineHeight:21,
+    lineHeight: 21,
     ...styleText.bold,
   },
   subText: {
-    color: '#565A70',
+    color: Grey,
     marginTop: '1%',
-    fontSize: 12,
+    fontSize: hp(1.6),
     ...styleText.semiBold,
   },
   backgroundColor: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: Transparent,
   },
   view: {
     width: width,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    backgroundColor: 'white',
+    backgroundColor: White,
     alignItems: 'center',
     padding: '3%',
   },

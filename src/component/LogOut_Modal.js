@@ -3,6 +3,9 @@ import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Logout } from '../Slice/LoginAuthSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { styleText } from '../assets/fonts/Fonts';
+import { hp, wp } from '../Global_Com/responsiveScreen';
+import { Black, Grey_Button_Color, Transparent, White, Yellow } from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');
 const LogOut_Modal = ({visible,setVisible,func,subText,name},props) => {
 
@@ -14,25 +17,25 @@ const LogOut_Modal = ({visible,setVisible,func,subText,name},props) => {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'flex-end',
-          backgroundColor: 'rgba(0,0,0,0.5)',
+          backgroundColor: Transparent,
         }}>
         <View
           style={{
-            height: height / 4.4,
-            width: width,
+            width: wp(100),
             borderTopLeftRadius: 15,
             borderTopRightRadius: 15,
-            backgroundColor: 'white',
+            backgroundColor: White,
             alignItems: 'center',
+            paddingBottom:"4%"
           }}>
-          <Text style={{fontSize:24,fontWeight:"500",color:"#2D303D",marginTop:'2%'}}>{name}</Text>
-          <Text style={{fontSize:16,marginTop:'2%'}}>{subText}</Text>
+          <Text style={{fontSize:hp(3.5),color:Black,marginTop:'2%',...styleText.bold}}>{name}</Text>
+          <Text style={{fontSize:hp(2),marginTop:'2%',...styleText.semiBold}}>{subText}</Text>
           <View style={{flexDirection:"row",marginTop:"6%"}}>
-            <TouchableOpacity onPress={()=>setVisible(false)} style={{borderWidth:0,height:height/13,width:width/2.4,borderRadius:15,backgroundColor:"#EAEAEA",justifyContent:"center",alignItems:"center"}}>
-            <Text style={{color:"#2D303D",fontSize:17}}>No</Text>
+            <TouchableOpacity onPress={()=>setVisible(false)} style={{borderWidth:0,height:hp(7),width:wp(40),borderRadius:15,backgroundColor:Grey_Button_Color,justifyContent:"center",alignItems:"center"}}>
+            <Text style={{color:Black,fontSize:hp(2.5),...styleText.semiBold}}>No</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={func} style={{borderWidth:0,height:height/13,width:width/2.4,borderRadius:15,justifyContent:"center",alignItems:"center",marginLeft:"3%",backgroundColor:"#EFA44A"}}>
-            <Text style={{color:"white",fontSize:17}}>Yes</Text>
+            <TouchableOpacity onPress={func} style={{borderWidth:0,height:hp(7),width:wp(40),borderRadius:15,justifyContent:"center",alignItems:"center",marginLeft:"3%",backgroundColor:Yellow}}>
+            <Text style={{color:White,fontSize:hp(2.5),...styleText.semiBold}}>Yes</Text>
             </TouchableOpacity>
           </View>
         </View>

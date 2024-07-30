@@ -2,12 +2,19 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import React, {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import FoundUser from '../assets/svgs/FoundUser';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+
 import {styleText} from '../assets/fonts/Fonts';
 import SeachBar from '../component/SeachBar';
 import {useDispatch, useSelector} from 'react-redux';
@@ -26,11 +33,16 @@ import moment from 'moment';
 import LogOut_Modal from '../component/LogOut_Modal';
 import Proceed_Request_Modal from '../component/Proceed_Request_Modal';
 import {isFulfilled} from '@reduxjs/toolkit';
-import { useFocusEffect } from '@react-navigation/native';
+import {useFocusEffect} from '@react-navigation/native';
 import Activity_Indicator from '../component/Activity_Indicator';
+
+import FlashMessage, {showMessage} from 'react-native-flash-message';
+import {FoundUser, Yarn_Logo} from '../assets/svgs/svg';
 import Toast from '../../Toast';
-import FlashMessage, { showMessage } from 'react-native-flash-message';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {Black, White} from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');
+
 const User = props => {
   const [search, setSearch] = useState();
   const [PendignRequestData, setPendignRequestData] = useState();
@@ -40,50 +52,77 @@ const User = props => {
   const [isproceedPendingRequest, setIsproceedPendingRequest] = useState(false);
   const [isproceedCurrentRequest, setIsproceedCurrentRequest] = useState(false);
   const [checked, setChecked] = useState('');
+  const [loading,setLoading]=useState(false)
   const [id, setId] = useState();
-  const toastRef = useRef(null)
+  const toastRef = useRef(null);
   const dispatch = useDispatch();
 
   const pendignRequest = useSelector(state => state?.User?.PendignRequest);
   const pending = useSelector(state => state?.User?.pending);
+  const OldPendignRequest = useSelector(state => state?.User?.OldPendignRequest);
+  const OldCurrentUser = useSelector(state => state?.User?.OldCurrentUser);
+
   const currentUser = useSelector(state => state?.User?.CurrentUser);
+  useLayoutEffect(() => {
+    props.navigation.setOptions({
+      headerLeft: () => {
+        return (
+          <View>
+            <Toast ref={toastRef} />
+            <View
+              style={{
+                paddingLeft: '5%',
+                flexDirection: 'row',
+                borderWidth: 0,
+                width: width,
+                alignItems: 'center',
+              }}>
+              <Yarn_Logo height={hp(9)} width={wp(9)} />
+              <Text
+                style={{
+                  ...styleText.bold,
+                  fontSize: 20,
+                  color: White,
+                  marginLeft: '33%',
+                }}>
+                User
+              </Text>
+            </View>
+          </View>
+        );
+      },
+    });
+  }, [props.navigation]);
 
   useEffect(() => {
+    setSearch(null);
     dispatch(GetPendignRequest());
     dispatch(GetCurrentUser());
   }, []);
 
   useFocusEffect(
     useCallback(() => {
+      setSearch(null);
       dispatch(GetPendignRequest());
       dispatch(GetCurrentUser());
     }, []),
   );
 
-  const handleError = useCallback((message) => {
-    showMessage({
-      message: "Error",
-      type:"danger",
-      description : message,
-      icon : { icon: "danger",position:"left" },
-      style:{
-        alignItems:"center"
-      }
-    });
-  }, [toastRef]);
+  const handleError = useCallback(
+    message => {
+      toastRef.current.error(message);
+      toastRef.current.Height(-StatusBar.currentHeight);
+    },
+    [toastRef],
+  );
 
-  const handleSuccess = useCallback((message) => {
-    showMessage({
-      message: "Success",
-      type:"success",
-      description : message,
-      icon : { icon: "success",position:"left" },
-      style:{
-        alignItems:"center"
-      }
-
-    });
-  }, [toastRef]);
+  const HandleSuccess = useCallback(
+    message => {
+      toastRef.current.success(message);
+      toastRef.current.Height(-StatusBar.currentHeight);
+    },
+    [toastRef],
+  );
 
   useEffect(() => {
     dispatch(SearchCurrentData(search));
@@ -96,8 +135,32 @@ const User = props => {
   }, [pendignRequest, currentUser]);
 
   function getTimeAgo(time) {
-    const formattedDate = moment(time).format('DD-MM-YYYY');
-    return formattedDate;
+    const date = new Date(time);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const weeks = Math.floor(days / 7);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (years > 0) {
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    } else if (months > 0) {
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else if (weeks > 0) {
+      return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else if (days > 0) {
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (minutes > 0) {
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else {
+      return `${seconds} second${seconds > 1 ? 's' : ''} ago`;
+    }
   }
   const DisplayPendignRequestData = () => {
     return (
@@ -106,13 +169,13 @@ const User = props => {
           style={{
             fontSize: 20,
             ...styleText.bold,
-            color: '#2D303D',
+            color: Black,
             marginLeft: '4%',
             marginTop: '3%',
           }}>
           Pending Request
         </Text>
-        <ScrollView>
+        <ScrollView contentContainerStyle={{marginTop: width / 30}}>
           {PendignRequestData?.map(item => {
             return (
               <UserContainer
@@ -141,13 +204,13 @@ const User = props => {
           style={{
             fontSize: 20,
             ...styleText.bold,
-            color: '#2D303D',
+            color: Black,
             marginLeft: '4%',
             marginTop: '3%',
           }}>
           All User
         </Text>
-        <ScrollView>
+        <ScrollView contentContainerStyle={{marginTop: width / 30}}>
           {currentUserData?.map(item => {
             return (
               <UserContainer
@@ -179,19 +242,26 @@ const User = props => {
         setVisible={setIsShowRemoveCom}
         name={'Remove Invitation'}
         subText={'Are you sure to remove this user  invitation?'}
-        func={() => {
-          dispatch(RemovePendingRequest(JSON.stringify(id))).then(async a => {
-            console.log(a,'==================a')
-            if (a.error){
-              handleError(a.message)
-            } else{
-              handleError(a.payload.message)
-              setIsShowRemoveCom(false);
-              dispatch(GetPendignRequest());
-              dispatch(GetCurrentUser());
-              setId(null);
-            }
-          });
+        func={async () => {
+          try {
+            setLoading(true)
+            await dispatch(RemovePendingRequest(id)).then(async a => {
+              if (a.error) {
+                setLoading(false)
+                handleError(a.message);
+              } else {
+                setLoading(false)
+                handleError(a.payload.message);
+                setIsShowRemoveCom(false);
+                dispatch(GetPendignRequest());
+                dispatch(GetCurrentUser());
+                setId(null);
+              }
+            });
+          } catch (error) {
+            setLoading(false)
+            handleError(error.message);
+          }
         }}
       />
     );
@@ -203,18 +273,26 @@ const User = props => {
         setVisible={setIsShowRemoveCurrent}
         name={'Remove Invitation'}
         subText={'Are you sure to remove this user  invitation?'}
-        func={() => {
-          dispatch(RemoveCurrentRequest(JSON.stringify(id))).then(async a => {
-            if (a.error){
-              handleError(a.message)
-            } else{
-              handleError(a.payload.message)
-              setIsShowRemoveCurrent(false);
-              dispatch(GetPendignRequest());
-              dispatch(GetCurrentUser());
-              setId(null);
-            }
-          });
+        func={async() => {
+          setLoading(true)
+          try {
+            await dispatch(RemoveCurrentRequest(id)).then(async a => {
+              if (a.error) {
+                setLoading(false)
+                handleError(a.message);
+              } else {
+                setLoading(false)
+                handleError(a.payload.message);
+                setIsShowRemoveCurrent(false);
+                dispatch(GetPendignRequest());
+                dispatch(GetCurrentUser());
+                setId(null);
+              }
+            });
+          } catch (error) {
+            setLoading(false)
+            handleError(error.message);
+          }
         }}
       />
     );
@@ -223,27 +301,35 @@ const User = props => {
     return (
       <Proceed_Request_Modal
         func={async () => {
-          await dispatch(
-            ProceedPendingRequest(
-              JSON.stringify({
-                id: id,
-                data: {
-                  role: checked.toLowerCase(),
+          setLoading(true)
+          try {
+            await dispatch(
+              ProceedPendingRequest(
+                {
+                  id: id,
+                  data: {
+                    role: checked.toLowerCase(),
+                  },
                 },
-              }),
-            ),
-          ).then(a => {
-            if (a.error){
-                handleError(a.message)
-            } else{
-              handleSuccess(a.payload.message)
-              dispatch(GetCurrentUser());
-              dispatch(GetPendignRequest());
-              setChecked('');
-              setId(null);
-              setIsproceedPendingRequest(false);
-            }
-          });
+              ),
+            ).then(a => {
+              if (a.error) {
+                setLoading(false)
+                handleError(a.message);
+              } else {
+                setLoading(false)
+                HandleSuccess(a.payload.message);
+                dispatch(GetCurrentUser());
+                dispatch(GetPendignRequest());
+                setChecked('');
+                setId(null);
+                setIsproceedPendingRequest(false);
+              }
+            });
+          } catch (error) {
+            setLoading(false)
+            handleError(error.message);
+          }
         }}
         visible={isproceedPendingRequest}
         setVisible={setIsproceedPendingRequest}
@@ -256,27 +342,34 @@ const User = props => {
     return (
       <Proceed_Request_Modal
         func={async () => {
-          await dispatch(
-            ProceedCurrentRequest(
-              JSON.stringify({
-                id: id,
-                data: {
-                  role: checked.toLowerCase(),
-                },
-              }),
-            ),
-          ).then(a => {
-            if (a.error){
-                handleError(a.message)
-            } else{
-              handleSuccess(a.payload.message)
-              dispatch(GetCurrentUser());
-              dispatch(GetPendignRequest());
-              setChecked('');
-              setId(null);
-              setIsproceedCurrentRequest(false);
-            }
-          });
+          setLoading(true)
+          try {
+            await dispatch(
+              ProceedCurrentRequest({
+                  id: id,
+                  data: {
+                    role: checked.toLowerCase(),
+                  },
+              },
+              ),
+            ).then(a => {
+              if (a.error) {
+                setLoading(false)
+                handleError(a.message);
+              } else {
+                setLoading(false)
+                HandleSuccess(a.payload.message);
+                dispatch(GetCurrentUser());
+                dispatch(GetPendignRequest());
+                setChecked('');
+                setId(null);
+                setIsproceedCurrentRequest(false);
+              }
+            });
+          } catch (error) {
+            setLoading(false)
+            handleError(error.message);
+          }
         }}
         visible={isproceedCurrentRequest}
         setVisible={setIsproceedCurrentRequest}
@@ -286,16 +379,17 @@ const User = props => {
     );
   };
   return (
-
     <View style={styles.container}>
-    <FlashMessage ref={toastRef} />
+    {
+        loading ? <Activity_Indicator/> : null
+      }
       {pending ? (
-        <Activity_Indicator/>
+        <Activity_Indicator />
       ) : (
         <View>
           {(PendignRequestData?.length > 0 ||
             currentUserData?.length > 0 ||
-            search) && <SeachBar setSearch={setSearch} />}
+            search || OldCurrentUser?.length > 0 || OldPendignRequest?.length > 0) && <SeachBar setSearch={setSearch} />}
           {(PendignRequestData?.length === 0 &&
             currentUserData?.length === 0) ||
           (search &&
@@ -305,15 +399,15 @@ const User = props => {
             !currentUserData?.some(item =>
               item.name.toLowerCase().includes(search.toLowerCase()),
             )) ? (
-            <View style={{alignItems: 'center', marginVertical: '55%'}}>
-              <FoundUser />
+            <View style={{alignItems: 'center', marginVertical: hp(25)}}>
+              <FoundUser height={hp(20)} width={hp(20)} />
               <Text style={styles.text}>No User found</Text>
             </View>
           ) : (
-            <>
+            <ScrollView showsVerticalScrollIndicator={false}>
               {PendignRequestData?.length > 0 && <DisplayPendignRequestData />}
               {currentUserData?.length > 0 && <DisplayCurrentUserData />}
-            </>
+            </ScrollView>
           )}
           {RemovePendingUser()}
           {RemoveCurrentUser()}
@@ -321,7 +415,6 @@ const User = props => {
           {ProceedCurrentRequests()}
         </View>
       )}
-      <Toast ref={toastRef}/>
     </View>
   );
 };
@@ -331,10 +424,10 @@ export default User;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: White,
   },
   text: {
-    color: '#2D303D',
+    color: Black,
     ...styleText.bold,
     fontSize: 21,
   },
