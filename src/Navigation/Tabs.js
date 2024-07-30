@@ -5,7 +5,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Yarn from '../screens/Yarn';
 import Quality from '../screens/Quality';
@@ -19,27 +25,38 @@ import {URL} from '../URLs/URL';
 import {EndPoints} from '../URLs/EndPoints';
 import axios from 'axios';
 import {useFocusEffect} from '@react-navigation/native';
-import { Profile_Black, Profile_Yellow, QualityLogo, QualityLogo_Black, QualityLogo_Yellow, Setting_Black, Setting_Yellow, Union, Yarn_Black, Yarn_Logo, Yarn_Yellow } from '../assets/svgs/svg';
-import { ConditionContext } from '../screens/ConditionContext';
-import { hp, wp } from '../Global_Com/responsiveScreen';
-import { Black, White, Yellow } from '../Global_Com/color';
+import {
+  Profile_Black,
+  Profile_Yellow,
+  QualityLogo,
+  QualityLogo_Black,
+  QualityLogo_Yellow,
+  Setting_Black,
+  Setting_Yellow,
+  Union,
+  Yarn_Black,
+  Yarn_Logo,
+  Yarn_Yellow,
+} from '../assets/svgs/svg';
+import {ConditionContext} from '../screens/ConditionContext';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {Black, White, Yellow} from '../Global_Com/color';
 const options = {
   tabBarStyle: {
     height: hp(11),
     shadowColor: Black,
     backgroundColor: White,
-
   },
-  keyboardVerticalOffset : 100
+  keyboardVerticalOffset: 100,
 };
-const Tabs = (props) => {
-  const { condition,setCondition } = useContext(ConditionContext);
+const Tabs = props => {
+  const {condition, setCondition} = useContext(ConditionContext);
   useFocusEffect(
     useCallback(() => {
-      const response = axios.get(`${URL}${EndPoints.GetProfile}`).then((res)=>{
+      const response = axios.get(`${URL}${EndPoints.GetProfile}`).then(res => {
         setCondition(res.data.result.role);
-      })
-    }, [])
+      });
+    }, []),
   );
   return (
     <Tab.Navigator screenOptions={options} initialRouteName="Quality">
@@ -69,8 +86,8 @@ const Tabs = (props) => {
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute',top:-2}}>
-                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
+                <View style={{position: 'absolute', top: -2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)} /> : null}
                 </View>
                 <View
                   style={{
@@ -79,10 +96,17 @@ const Tabs = (props) => {
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                  {
-                    focused ? <QualityLogo_Yellow height={hp(4.2)} width={hp(4.2)}/> : <QualityLogo_Black height={hp(4.2)} width={hp(4.2)}/>
-                  }
-                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
+                  {focused ? (
+                    <QualityLogo_Yellow height={hp(4.2)} width={hp(4.2)} />
+                  ) : (
+                    <QualityLogo_Black height={hp(4.2)} width={hp(4.2)} />
+                  )}
+                  <Text
+                    style={{
+                      color: focused ? Yellow : Black,
+                      fontSize: wp(3.4),
+                      ...styleText.semiBold,
+                    }}>
                     Quality
                   </Text>
                 </View>
@@ -93,9 +117,7 @@ const Tabs = (props) => {
         name="Quality"
         component={Quality}
       />
-      {
-        (condition === 'root' || condition === 'admin')
-       ? (
+      {condition === 'root' || condition === 'admin' ? (
         <Tab.Screen
           options={{
             tabBarShowLabel: false,
@@ -114,8 +136,8 @@ const Tabs = (props) => {
                     alignItems: 'center',
                     flexDirection: 'column',
                   }}>
-                  <View style={{position: 'absolute',top:-2}}>
-                    {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
+                  <View style={{position: 'absolute', top: -2}}>
+                    {focused ? <Union height={hp(2)} width={hp(6)} /> : null}
                   </View>
                   <View
                     style={{
@@ -125,10 +147,17 @@ const Tabs = (props) => {
                       flexDirection: 'column',
                       alignItems: 'center',
                     }}>
-                    {
-                    focused ? <Profile_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Profile_Black  height={hp(4.2)} width={hp(4.2)}/>
-                  }
-                    <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
+                    {focused ? (
+                      <Profile_Yellow height={hp(4.2)} width={hp(4.2)} />
+                    ) : (
+                      <Profile_Black height={hp(4.2)} width={hp(4.2)} />
+                    )}
+                    <Text
+                      style={{
+                        color: focused ? Yellow : Black,
+                        fontSize: wp(3.4),
+                        ...styleText.semiBold,
+                      }}>
                       User
                     </Text>
                   </View>
@@ -162,8 +191,8 @@ const Tabs = (props) => {
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute',top:-2}}>
-                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
+                <View style={{position: 'absolute', top: -2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)} /> : null}
                 </View>
                 <View
                   style={{
@@ -172,10 +201,17 @@ const Tabs = (props) => {
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                 {
-                    focused ? <Yarn_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Yarn_Black  height={hp(4.2)} width={hp(4.2)}/>
-                  }
-                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
+                  {focused ? (
+                    <Yarn_Yellow height={hp(4.2)} width={hp(4.2)} />
+                  ) : (
+                    <Yarn_Black height={hp(4.2)} width={hp(4.2)} />
+                  )}
+                  <Text
+                    style={{
+                      color: focused ? Yellow : Black,
+                      fontSize: wp(3.4),
+                      ...styleText.semiBold,
+                    }}>
                     Yarn
                   </Text>
                 </View>
@@ -201,7 +237,7 @@ const Tabs = (props) => {
           },
           headerLeft: () => (
             <View style={{marginLeft: '13%'}}>
-             <Yarn_Logo height={hp(9)} width={wp(9)} />
+              <Yarn_Logo height={hp(9)} width={wp(9)} />
             </View>
           ),
           headerBackground: () => {},
@@ -213,8 +249,8 @@ const Tabs = (props) => {
                   alignItems: 'center',
                   flexDirection: 'column',
                 }}>
-                <View style={{position: 'absolute',top:-2}}>
-                  {focused ? <Union height={hp(2)} width={hp(6)}/> : null}
+                <View style={{position: 'absolute', top: -2}}>
+                  {focused ? <Union height={hp(2)} width={hp(6)} /> : null}
                 </View>
                 <View
                   style={{
@@ -223,10 +259,17 @@ const Tabs = (props) => {
                     flexDirection: 'column',
                     alignItems: 'center',
                   }}>
-                  {
-                    focused ? <Setting_Yellow  height={hp(4.2)} width={hp(4.2)}/> : <Setting_Black  height={hp(4.2)} width={hp(4.2)}/>
-                  }
-                  <Text style={{color: focused ? Yellow : Black,fontSize:wp(3.4),...styleText.semiBold}}>
+                  {focused ? (
+                    <Setting_Yellow height={hp(4.2)} width={hp(4.2)} />
+                  ) : (
+                    <Setting_Black height={hp(4.2)} width={hp(4.2)} />
+                  )}
+                  <Text
+                    style={{
+                      color: focused ? Yellow : Black,
+                      fontSize: wp(3.4),
+                      ...styleText.semiBold,
+                    }}>
                     Settings
                   </Text>
                 </View>

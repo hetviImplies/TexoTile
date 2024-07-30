@@ -44,7 +44,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
 import DocumentPicker from 'react-native-document-picker';
 import {Camera, Image, LeftArrow, Pdf, Save} from '../assets/svgs/svg';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import {hp, wp} from '../Global_Com/responsiveScreen';
 import {
   Black,
@@ -61,7 +61,6 @@ import {Validation_YarnData} from '../Utils/Regex';
 const {height, width} = Dimensions.get('window');
 const QualityDetail = props => {
   const data = props.route.params?.data;
-  console.log('data: ', data);
   let QualityFormData = new FormData()
   const [loading, setLoading] = useState(false);
   const [qualityName, setQualityName] = useState('');
@@ -296,26 +295,26 @@ const QualityDetail = props => {
 
   pasramani_Pattern!==null ? QualityFormData.append('pasramani_pattern',Object.keys(pasramani_Pattern).length !== 0 ? {
     uri: pasramani_Pattern,
-    type: pasramani_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern.split('.').pop()}`,
-    name : pasramani_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+    type: pasramani_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern?.split('.')?.pop()}`,
+    name : pasramani_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
   } : pasramani_Pattern ) : null
 
   sample!==null ? QualityFormData.append('sample',Object.keys(sample).length !== 0 ? {
     uri: sample,
-    type: sample.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${sample.split('.').pop()}`,
-    name : sample.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+    type: sample?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${sample?.split('.')?.pop()}`,
+    name : sample?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
   } : sample ) : null
 
   pick_Pattern!==null ? QualityFormData.append('pick_pattern',Object.keys(pick_Pattern).length !== 0 ? {
     uri: pick_Pattern,
-    type: pick_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pick_Pattern.split('.').pop()}`,
-    name : pick_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+    type: pick_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pick_Pattern?.split('.')?.pop()}`,
+    name : pick_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
   } : pick_Pattern ) : null
 
   lattice_Pattern!==null ? QualityFormData.append('latis_pattern',Object.keys(lattice_Pattern).length !== 0 ? {
     uri: lattice_Pattern,
-    type: lattice_Pattern.toLowerCase().endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern.split('.').pop()}`,
-    name : lattice_Pattern.toLowerCase().endsWith('.pdf') ? 'PDF' : `IMAGE`
+    type: lattice_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern?.split('.')?.pop()}`,
+    name : lattice_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
   } : lattice_Pattern ) : null
 
   final_Warp_Data.forEach((item, index) => {
@@ -329,8 +328,6 @@ const QualityDetail = props => {
         QualityFormData.append(`weft_data[${index}][${key}]`, item[key]);
     }
   });
-
-  console.log('QualityFormData: ', QualityFormData.getParts('pick_Pattern'));
 
 
   // const QualityData = {
@@ -531,8 +528,7 @@ const QualityDetail = props => {
           await ImagePicker.requestCameraPermission();
         setCameraPermission(cameraPermissionStatus === AppConstant.GRANTED);
       }
-  };
-  console.log('sample?.uri: ', sample?.uri);
+  }
 
   const handleTakePhoto = async() => {
     if (!cameraPermission) {

@@ -17,7 +17,6 @@ const {height, width} = Dimensions.get('window');
 
 const ImageView = ({route, navigation}) => {
   const {image, Title} = route.params;
-  console.log('image: ', image);
   useLayoutEffect(() => {
     if (image.substring(image.lastIndexOf('.') + 1) !== 'jpg') {
       navigation.setOptions(

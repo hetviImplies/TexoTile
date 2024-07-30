@@ -26,7 +26,7 @@ import {EndPoints} from '../URLs/EndPoints';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FlashMessage, {showMessage} from 'react-native-flash-message';
 const {height, width} = Dimensions.get('window');
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import {ConditionContext} from './ConditionContext';
 import {hp} from '../Global_Com/responsiveScreen';
 import {styleText} from '../assets/fonts/Fonts';
@@ -184,11 +184,8 @@ const VerifyPhone = props => {
           onTextChange={text => setOtp(text)}
           textInputProps={{
             accessibilityLabel: 'One-Time Password',
-
           }}
-
           theme={{
-
             containerStyle: {
               width: 350,
               alignSelf: 'center',

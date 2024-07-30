@@ -38,7 +38,7 @@ import Activity_Indicator from '../component/Activity_Indicator';
 
 import FlashMessage, {showMessage} from 'react-native-flash-message';
 import {FoundUser, Yarn_Logo} from '../assets/svgs/svg';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import {hp, wp} from '../Global_Com/responsiveScreen';
 import {Black, White} from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');

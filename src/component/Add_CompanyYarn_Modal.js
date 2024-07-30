@@ -47,14 +47,13 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
       }
     }
   };
-  const HandlePress = () => {
+  const HandlePress = async () => {
     setIsDisable(true)
     setLoading(true)
-    if (modal_Type == 'Yarn') {
-      dispatch(
-        AddYarnData({
+     await dispatch((modal_Type == 'Yarn' ? AddYarnData : AddYarnCompany)
+        ({
           name: input1,
-          rate: input2,
+          ...(modal_Type == 'Yarn' ? { rate: input2 } : null),
         }),
       ).then(a => {
         if (a.payload.error === false) {
@@ -69,24 +68,7 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
           Alert.alert(a.payload.message)
         }
       });
-    } else {
-      dispatch(
-        AddYarnCompany({
-          name: input1,
-        }),
-      ).then(a => {
-        if (a.payload.error === false) {
-          setIsDisable(false)
-          setLoading(false)
-          setInput1(null);
-          setInput2(null);
-          setValue(false);
-        }else{
-          setIsDisable(false)
-          setLoading(false)
-        }
-      });
-    }
+
   };
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
@@ -102,14 +84,12 @@ const Add_Modal = ({visible, setValue, modal_Type}) => {
             <TextInput
               value={input1}
               onChangeText={e => {
-                let newName = e; // don't use trim() here
+                let newName = e;
                 if (newName.charAt(0) === ' ') {
-                  // if the first character is a space, remove it
                   newName = newName.substring(1);
                 }
                 if (newName.length > 1) {
-                  // if the input string has more than one character
-                  newName = newName.replace(/\s{2,}/g, ' '); // replace 2 or more spaces with a single space
+                  newName = newName.replace(/\s{2,}/g, ' ');
                 }
                 setInput1(newName);
               }}

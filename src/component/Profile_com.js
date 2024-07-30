@@ -19,14 +19,12 @@ const Profile_com = ({
       selectionColor={Yellow}
         placeholder={placeholder}
         onChangeText={e => {
-          let newName = e; // don't use trim() here
+          let newName = e;
             if (newName.charAt(0) === ' ') {
-              // if the first character is a space, remove it
               newName = newName.substring(1);
             }
             if (newName.length > 1) {
-              // if the input string has more than one character
-              newName = newName.replace(/\s{2,}/g, ' '); // replace 2 or more spaces with a single space
+              newName = newName.replace(/\s{2,}/g, ' ');
             }
           setvalue(newName);
         }}

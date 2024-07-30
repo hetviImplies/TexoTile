@@ -42,7 +42,7 @@ import {
   White,
   Yellow,
 } from '../Global_Com/color';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import Activity_Indicator from '../component/Activity_Indicator';
 import {DecimalNum} from '../Utils/Regex';
 const UpdateYarn = ({route, navigation}) => {

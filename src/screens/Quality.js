@@ -303,7 +303,11 @@ const Quality = props => {
   );
 
   useLayoutEffect(() => {
-    if (Data?.length > 0 && condition !== 'view' && condition !== null) {
+    if (
+      QualityOldDt?.length > 0 &&
+      condition !== 'view' &&
+      condition !== null
+    ) {
       props.navigation.setOptions({
         headerRight: () => (
           <TouchableOpacity
@@ -333,7 +337,7 @@ const Quality = props => {
         ),
       });
     }
-  }, [Data, props.navigation, condition]);
+  }, [Data, condition]);
 
   return (
     <View style={GlobalStyles.ContainerWithoutJustifty}>

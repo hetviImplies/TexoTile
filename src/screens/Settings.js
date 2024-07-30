@@ -8,7 +8,7 @@ import {useDispatch} from 'react-redux';
 import {White} from '../Global_Com/color';
 import screens from '../constants/screens';
 import AppConstant from '../Utils/AppConstant';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import { GlobalStyles } from '../Global_Com/Style';
 
 const Settings = props => {

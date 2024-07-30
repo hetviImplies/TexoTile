@@ -2,11 +2,10 @@ import React, {forwardRef, useRef, useState, useImperativeHandle} from 'react';
 import {View, Animated, Text, StatusBar, StyleSheet, Dimensions} from 'react-native';
 
 
-import { Black, Green, Red, White } from './src/Global_Com/color';
-import { styleText } from './src/assets/fonts/Fonts';
-import { hp, wp } from './src/Global_Com/responsiveScreen';
-import { Error, Success } from './src/assets/svgs/svg';
-const {height,width}=Dimensions.get("window")
+import { Black, Green, Red, White} from "../Global_Com/color"
+import { styleText } from "../assets/fonts/Fonts"
+import { hp, wp } from "../Global_Com/responsiveScreen"
+import { Error, Success } from "../assets/svgs/svg"
 const Toast = forwardRef((props, ref) => {
     const animatedValue = useRef(new Animated.Value(0)).current;
     const [modalShown, setModalShown] = useState(false);

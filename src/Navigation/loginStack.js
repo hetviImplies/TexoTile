@@ -26,7 +26,6 @@ import {Provider, useDispatch, useSelector} from 'react-redux';
 import Store from '../store/store';
 import {ConditionProvider} from '../screens/ConditionContext';
 import {White, Yellow} from '../Global_Com/color';
-import Toast from 'react-native-toast-message';
 import {hp} from '../Global_Com/responsiveScreen';
 import screens from '../constants/screens';
 import {GetUser} from '../Slice/LoginAuthSlice';
@@ -61,7 +60,7 @@ const LoginStack = () => {
               }
             }
           } else {
-            setName(screens.UpdateUser);
+            setName(screens.Login);
           }
         } else {
           setName(screens.Login);
@@ -90,12 +89,6 @@ const LoginStack = () => {
               <stack.Screen
                 component={ConditionProvider}
                 name={screens.ConditionProvider}></stack.Screen>
-              <stack.Screen
-                component={VerifyPhone}
-                name={screens.VerifyPhone}></stack.Screen>
-              <stack.Screen
-                component={UpdateUser}
-                name={screens.UpdateUser}></stack.Screen>
               <stack.Screen
                 component={Preference}
                 name={screens.Preference}></stack.Screen>

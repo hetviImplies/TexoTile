@@ -25,7 +25,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {styleText} from '../assets/fonts/Fonts';
 import {URL} from '../URLs/URL';
 import {EndPoints} from '../URLs/EndPoints';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import FlashMessage, {showMessage} from 'react-native-flash-message';
 import {ConditionContext} from './ConditionContext';
 import axios from 'axios';

@@ -36,7 +36,6 @@ const OpenModal = ({
 }) => {
   const [error, setError] = useState();
   const [caperror, setCapError] = useState();
-  console.log('isDisable: ', isDisable);
 
   useEffect(() => {
     if (value === '') {

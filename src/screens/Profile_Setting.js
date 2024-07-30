@@ -28,7 +28,7 @@ import {GlobalStyles} from '../Global_Com/Style';
 import {hp, wp} from '../Global_Com/responsiveScreen';
 import {emailRegex} from '../Utils/Regex';
 import Activity_Indicator from '../component/Activity_Indicator';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import {LeftArrow, Yarn_Logo} from '../assets/svgs/svg';
 
 const Profile_Setting = props => {
@@ -126,22 +126,22 @@ const Profile_Setting = props => {
 
   useEffect(() => {
     if (
-      (third === '' && data.Third !== 'Company Address') ||
-      data.Third === 'Company Address'
+      (third === '' && data.Third !== 'Company Address' && first) ||
+      (data.Third === 'Company Address')
     ) {
       setEmailError(false);
       setError(false)
     } else {
       const isValidEmail = emailRegex.test(third?.trim());
-      setEmailError(!isValidEmail);
+      if(third!==''){
+        setEmailError(!isValidEmail);
+      }
       setError(first==='')
     }
   }, [third,first]);
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <KeyboardAvoidingView
-        keyboardVerticalOffset={-hp(5)}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      <View
         style={GlobalStyles.ContainerWithoutJustifty}>
         {loading ? <Activity_Indicator /> : null}
 
@@ -204,7 +204,7 @@ const Profile_Setting = props => {
         ) : null}
 
         <ButtonPress title={AppConstant.Save} func={HandlePress} />
-      </KeyboardAvoidingView>
+      </View>
     </TouchableWithoutFeedback>
   );
 };

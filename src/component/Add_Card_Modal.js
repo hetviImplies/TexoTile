@@ -23,8 +23,8 @@ import {
   White,
   Yellow,
 } from '../Global_Com/color';
-import { DecimalNum, OnlyNum } from '../Utils/Regex';
-import { wp } from '../Global_Com/responsiveScreen';
+import {DecimalNum, OnlyNum} from '../Utils/Regex';
+import {wp} from '../Global_Com/responsiveScreen';
 
 const YarnModal = ({
   visible,
@@ -114,7 +114,7 @@ const YarnModal = ({
     }
   }, [Width]);
 
-  useEffect(() => {
+   useEffect(() => {
     EraseData();
     if (modal_T == 'Warp') {
       setYarn_name(editData?.data?.yarn?.name);
@@ -150,8 +150,18 @@ const YarnModal = ({
     );
   };
 
+  const DataCreate = () => {
+    let obj = {};
+        if (modal_T == 'Warp') {
+          obj = Warp_Data;
+        } else {
+          obj = Weft_Data;
+        }
+        setData([...data, obj]);
+  };
+
   useEffect(() => {
-    if (modal_T == 'Weft') {
+    if (modal_T === 'Weft') {
       const newWidth = data[data.length - 1]?.width;
       const updatedWeftData = data.map(item => ({...item, width: newWidth}));
       setData(updatedWeftData);
@@ -163,116 +173,56 @@ const YarnModal = ({
     if (Warp_Data.id != null || Weft_Data.id != null) {
       const isCreateData = data.find((a, i) => i == index);
       if (isCreateData != undefined) {
-        if (modal_T == 'Warp') {
           const updatedData = data.map(item => {
             if (item.id === editData.data.id) {
               return {
                 ...item,
-                weight: Warp_Data.weight,
-                cost: Warp_Data.cost,
-                deniar: Number(Warp_Data.deniar).toFixed(2),
-                beam_ends: Number(Warp_Data.beam_ends).toFixed(0),
-                shortage: Number(Warp_Data.shortage).toFixed(2),
-                yarn_rate: Number(Warp_Data.yarn_rate).toFixed(2),
-                tpm: Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm),
-                company: Warp_Data.company,
-                yarn: Warp_Data.yarn,
+                weight: modal_T == 'Warp' ? Warp_Data.weight : Weft_Data.weight,
+                cost: modal_T == 'Warp' ? Warp_Data.cost : Weft_Data.cost,
+                deniar : modal_T == 'Warp' ? Number(Warp_Data.deniar).toFixed(2) : Weft_Data.deniar,
+                ...(modal_T == 'Warp' ? { beam_ends:  Number(Warp_Data.beam_ends).toFixed(0) } : null),
+                ...(modal_T == 'Warp' ? { shortage:  Number(Warp_Data.shortage).toFixed(2) } : null),
+                ...(modal_T == 'Warp' ? null : { pick:  Weft_Data.pick }),
+                ...(modal_T == 'Warp' ? null : { width:  Weft_Data.width }),
+                ...(modal_T == 'Warp' ? null : { wastage:  Weft_Data.wastage }),
+                yarn_rate : modal_T == 'Warp' ? Number(Warp_Data.yarn_rate).toFixed(2) : Weft_Data.yarn_rate,
+                tpm: modal_T == 'Warp' ? Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm) : Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
+                company: modal_T == 'Warp' ? Warp_Data.company : Weft_Data.company,
+                yarn: modal_T == 'Warp' ? Warp_Data.yarn : Weft_Data.yarn,
               };
             }
             return item;
           });
           setData(updatedData);
-        } else {
-          const updatedData = data.map(item => {
-            if (item.id === editData.data.id) {
-              return {
-                ...item,
-                weight: Weft_Data.weight,
-                cost: Weft_Data.cost,
-                deniar: Weft_Data.deniar,
-                pick: Weft_Data.pick,
-                width: Weft_Data.width,
-                wastage: Weft_Data.wastage,
-                yarn_rate: Weft_Data.yarn_rate,
-                tpm: Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
-                company: Weft_Data.company,
-                yarn: Weft_Data.yarn,
-              };
-            }
-            item.width = Weft_Data.width;
-            return item;
-          });
-
-          SetWidth(Weft_Data.width);
-          setData(updatedData);
-        }
       } else {
-        let obj = {};
-        if (modal_T == 'Warp') {
-          obj = Warp_Data;
-        } else {
-          obj = Weft_Data;
-        }
-        setData([...data, obj]);
+        DataCreate()
       }
-      setClose(false);
-      EraseData();
-      setEditWarpData(null);
-      setEditWeftData(null);
     } else {
       const isCreateData = data.find((a, i) => i == index);
       if (isCreateData != undefined) {
-        if (modal_T == 'Warp') {
           const updatedData = data.map((item, i) => {
             if (i === index) {
               return {
                 ...item,
-                weight: Warp_Data.weight,
-                cost: Warp_Data.cost,
-                deniar: Number(Warp_Data.deniar).toFixed(2),
-                beam_ends: Number(Warp_Data.beam_ends).toFixed(0),
-                shortage: Number(Warp_Data.shortage).toFixed(2),
-                yarn_rate: Warp_Data.yarn_rate,
-                tpm: Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm),
-                company: Warp_Data.company,
-                yarn: Warp_Data.yarn,
+                weight: modal_T == 'Warp' ? Warp_Data.weight : Weft_Data.weight,
+                cost: modal_T == 'Warp' ? Warp_Data.cost : Weft_Data.cost,
+                deniar : modal_T == 'Warp' ? Number(Warp_Data.deniar).toFixed(2) : Weft_Data.deniar,
+                ...(modal_T == 'Warp' ? { beam_ends:  Number(Warp_Data.beam_ends).toFixed(0) } : null),
+                ...(modal_T == 'Warp' ? { shortage:  Number(Warp_Data.shortage).toFixed(2) } : null),
+                ...(modal_T == 'Warp' ? null : { pick:  Weft_Data.pick }),
+                ...(modal_T == 'Warp' ? null : { width:  Weft_Data.width }),
+                ...(modal_T == 'Warp' ? null : { wastage:  Weft_Data.wastage }),
+                yarn_rate : modal_T == 'Warp' ? Number(Warp_Data.yarn_rate).toFixed(2) : Weft_Data.yarn_rate,
+                tpm: modal_T == 'Warp' ? Number(Warp_Data.tpm) === '' ? 0 : Number(Warp_Data.tpm) : Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
+                company: modal_T == 'Warp' ? Warp_Data.company : Weft_Data.company,
+                yarn: modal_T == 'Warp' ? Warp_Data.yarn : Weft_Data.yarn,
               };
             }
             return item;
           });
           setData(updatedData);
-        } else {
-          const updatedData = data.map((item, i) => {
-            if (i === index) {
-              return {
-                ...item,
-                weight: Weft_Data.weight,
-                cost: Weft_Data.cost,
-                deniar: Weft_Data.deniar,
-                pick: Weft_Data.pick,
-                width: Weft_Data.width,
-                wastage: Weft_Data.wastage,
-                yarn_rate: Weft_Data.yarn_rate,
-                tpm: Number(Weft_Data.tpm) === '' ? 0 : Number(Weft_Data.tpm),
-                company: Weft_Data.company,
-                yarn: Weft_Data.yarn,
-              };
-            }
-            item.width = Weft_Data.width;
-            return item;
-          });
-
-          SetWidth(Weft_Data.width);
-          setData(updatedData);
-        }
       } else {
-        let obj = {};
-        if (modal_T == 'Warp') {
-          obj = Warp_Data;
-        } else {
-          obj = Weft_Data;
-        }
-        setData([...data, obj]);
+        DataCreate()
       }
     }
     setClose(false);
@@ -281,7 +231,76 @@ const YarnModal = ({
     setEditWeftData(null);
   };
 
-  const Warp_Data_Input = () =>{
+  useEffect(() => {
+    Weft_Data_Input();
+  }, [
+    Weft_Data.yarn_rate,
+    Weft_Data.deniar,
+    Weft_Data.pick,
+    Weft_Data.width,
+    Weft_Data.yarn_rate,
+    Weft_Data.wastage,
+    Weft_Data.company,
+    Weft_Data.yarn,
+  ]);
+
+  const Weft_Data_Input = () => {
+    if (
+      Weft_Data.deniar &&
+      Weft_Data.pick &&
+      Weft_Data.width &&
+      Weft_Data.yarn_rate &&
+      Weft_Data.wastage &&
+      Weft_Data.company.name != '' &&
+      Weft_Data.yarn.name != ''
+    ) {
+      setIsDisable(false);
+    } else {
+      setIsDisable(true);
+    }
+  };
+
+  useEffect(() => {
+    Weft_GetWeightAndCost();
+  }, [
+    Weft_Data.deniar &&
+      Weft_Data.pick &&
+      Weft_Data.width &&
+      Weft_Data.yarn_rate &&
+      Weft_Data.wastage,
+  ]);
+
+  const Weft_GetWeightAndCost = () => {
+    let value =
+      parseFloat(Weft_Data.deniar) *
+      parseFloat(Weft_Data.pick) *
+      parseFloat(Weft_Data.width);
+    const weight =
+      (((value * parseFloat(Weft_Data.wastage)) / 100 + value) / 9000000) * 100;
+    const cost =
+      (((value * parseFloat(Weft_Data.wastage)) / 100 + value) / 9000000) *
+      parseFloat(Weft_Data.yarn_rate);
+    const finalWeight = isNaN(weight) ? '00.00' : weight.toFixed(2);
+    const finalCost = isNaN(cost) ? '00.00' : cost.toFixed(2);
+    setWeft_data({
+      ...Weft_Data,
+      weight: finalWeight,
+      cost: finalCost,
+    });
+  };
+
+  useEffect(() => {
+    Warp_Data_Input();
+  }, [
+    Warp_Data.deniar,
+    Warp_Data.yarn_rate,
+    Warp_Data.beam_ends,
+    Warp_Data.shortage,
+    Warp_Data.yarn,
+    Warp_Data.company,
+  ]);
+
+  const Warp_Data_Input = () => {
     if (
       Warp_Data.deniar != '' &&
       Warp_Data.beam_ends != '' &&
@@ -294,86 +313,30 @@ const YarnModal = ({
     } else {
       setIsDisable(true);
     }
-    Warp_GetWeightAndCost()
-  }
-
-  const Weft_Data_Input = () =>{
-    if (
-      Weft_Data.deniar &&
-      Weft_Data.pick &&
-      Weft_Data.width &&
-      Weft_Data.yarn_rate &&
-      Weft_Data.wastage &&
-      Weft_Data.yarn_rate &&
-      Weft_Data.company.name != '' &&
-      Weft_Data.yarn.name != ''
-    ) {
-      setIsDisable(false);
-    } else {
-      setIsDisable(true);
-    }
-    Weft_GetWeightAndCost()
-  }
+  };
 
   useEffect(() => {
-    Warp_Data_Input()
+    Warp_GetWeightAndCost();
   }, [
     Warp_Data.deniar,
     Warp_Data.yarn_rate,
     Warp_Data.beam_ends,
     Warp_Data.shortage,
-    Warp_Data.yarn,
-    Warp_Data.company,
-
   ]);
 
-  useEffect(() => {
-    Weft_Data_Input()
-  }, [
-    Weft_Data.yarn_rate,
-    Weft_Data.deniar,
-    Weft_Data.pick,
-    Weft_Data.width,
-    Weft_Data.yarn_rate,
-    Weft_Data.wastage,
-    Weft_Data.company,
-    Weft_Data.yarn,
-  ]);
-
-  const Warp_GetWeightAndCost=()=>{
-    let value =
-        parseFloat(Warp_Data.deniar) * parseFloat(Warp_Data.beam_ends);
-      const weight =
-        (((value * parseFloat(Warp_Data.shortage)) / 100 + value) / 9000000) *
-        100;
-      const cost =
-        (((value * parseFloat(Warp_Data.shortage)) / 100 + value) / 9000000) *
-        parseFloat(Warp_Data.yarn_rate);
-      setWarp_data({
-        ...Warp_Data,
-        weight: isNaN(weight.toFixed(2)) ? '00.00' : weight.toFixed(2),
-        cost: isNaN(cost.toFixed(2)) ? '00.00' : cost.toFixed(2),
-      });
-  }
-
-  const Weft_GetWeightAndCost = () => {
-      let value =
-        parseFloat(Weft_Data.deniar) *
-        parseFloat(Weft_Data.pick) *
-        parseFloat(Weft_Data.width);
-      const weight =
-        (((value * parseFloat(Weft_Data.wastage)) / 100 + value) / 9000000) *
-        100;
-      const cost =
-        (((value * parseFloat(Weft_Data.wastage)) / 100 + value) / 9000000) *
-        parseFloat(Weft_Data.yarn_rate);
-      const finalWeight = isNaN(weight) ? '00.00' : weight.toFixed(2);
-      const finalCost = isNaN(cost) ? '00.00' : cost.toFixed(2);
-      setWeft_data({
-        ...Weft_Data,
-        weight: finalWeight,
-        cost: finalCost,
-      });
+  const Warp_GetWeightAndCost = () => {
+    let value = parseFloat(Warp_Data.deniar) * parseFloat(Warp_Data.beam_ends);
+    const weight =
+      (((value * parseFloat(Warp_Data.shortage)) / 100 + value) / 9000000) *
+      100;
+    const cost =
+      (((value * parseFloat(Warp_Data.shortage)) / 100 + value) / 9000000) *
+      parseFloat(Warp_Data.yarn_rate);
+    setWarp_data({
+      ...Warp_Data,
+      weight: isNaN(weight.toFixed(2)) ? '00.00' : weight.toFixed(2),
+      cost: isNaN(cost.toFixed(2)) ? '00.00' : cost.toFixed(2),
+    });
   };
 
   const EraseData = () => {
@@ -550,7 +513,9 @@ const YarnModal = ({
                   flexDirection: 'row',
                   marginHorizontal: '3%',
                 }}>
-                <Text style={{...styleText.medium,width:wp(80)}}>{yarn_name}</Text>
+                <Text style={{...styleText.medium, width: wp(80)}}>
+                  {yarn_name}
+                </Text>
                 <Down_Arrow />
               </View>
             </TouchableOpacity>
@@ -585,7 +550,9 @@ const YarnModal = ({
                   flexDirection: 'row',
                   marginHorizontal: '3%',
                 }}>
-                <Text style={{...styleText.medium,width:wp(80)}}>{company_name}</Text>
+                <Text style={{...styleText.medium, width: wp(80)}}>
+                  {company_name}
+                </Text>
                 <Down_Arrow />
               </View>
             </TouchableOpacity>
@@ -599,7 +566,7 @@ const YarnModal = ({
                 marginTop: '3%',
               }}>
               <Information_Input
-              keyboardType={"number-pad"}
+                keyboardType={'number-pad'}
                 func={i => (input1 = i)}
                 onSubmitEditing={() => input2.focus()}
                 returnKeyType="next"
@@ -636,7 +603,7 @@ const YarnModal = ({
                 }
               />
               <Information_Input
-              keyboardType={"number-pad"}
+                keyboardType={'number-pad'}
                 func={i => (input2 = i)}
                 returnKeyType="next"
                 returnKeyLabel="next"
@@ -656,7 +623,7 @@ const YarnModal = ({
                   modal_T == 'Warp'
                     ? text => {
                         if (text === '' || DecimalNum.test(text)) {
-                          let t=text.replace(OnlyNum, '');
+                          let t = text.replace(OnlyNum, '');
                           setWarp_data({
                             ...Warp_Data,
                             beam_ends: t,
@@ -673,7 +640,7 @@ const YarnModal = ({
                 }
               />
               <Information_Input
-              keyboardType={"number-pad"}
+                keyboardType={'number-pad'}
                 func={i => (input3 = i)}
                 returnKeyType="next"
                 returnKeyLabel="next"
@@ -708,7 +675,7 @@ const YarnModal = ({
                 }
               />
               <Information_Input
-              keyboardType={"number-pad"}
+                keyboardType={'number-pad'}
                 func={i => (input4 = i)}
                 returnKeyType="next"
                 returnKeyLabel="next"
@@ -750,7 +717,7 @@ const YarnModal = ({
               />
               {modal_T == 'Weft' ? (
                 <Information_Input
-                keyboardType={"number-pad"}
+                  keyboardType={'number-pad'}
                   func={i => (input5 = i)}
                   returnKeyType="next"
                   returnKeyLabel="next"
@@ -772,7 +739,7 @@ const YarnModal = ({
                 />
               ) : null}
               <Information_Input
-              keyboardType={"number-pad"}
+                keyboardType={'number-pad'}
                 func={i => (input6 = i)}
                 returnKeyType="done"
                 returnKeyLabel="done"
@@ -847,6 +814,6 @@ export default YarnModal;
 
 const styles = StyleSheet.create({
   Information_Input: {
-    marginHorizontal: width / 35,
+    marginHorizontal: wp(2.8),
   },
 });

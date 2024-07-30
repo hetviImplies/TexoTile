@@ -49,7 +49,7 @@ import {ConditionContext} from './ConditionContext';
 import {hp, wp} from '../Global_Com/responsiveScreen';
 import {Black, Red, White} from '../Global_Com/color';
 import screens from '../constants/screens';
-import Toast from '../../Toast';
+import Toast from '../component/Toast';
 import AppConstant from '../Utils/AppConstant';
 const {height, width} = Dimensions.get('window');
 const Yarn = ({navigation}) => {
@@ -86,7 +86,7 @@ const Yarn = ({navigation}) => {
   }, [search]);
 
   useLayoutEffect(() => {
-    if (Yarndata?.length > 0 && condition !== 'view' && condition !== null) {
+    if (YarnOldDt?.length > 0 && condition !== 'view' && condition !== null) {
       navigation.setOptions({
         headerRight: () => (
           <View style={{width: wp(100)}}>

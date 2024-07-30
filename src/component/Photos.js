@@ -16,7 +16,6 @@ import {
 } from '../Global_Com/color';
 const {height, width} = Dimensions.get('window');
 const Photos = ({title, onPress, photo, onPressDelete}) => {
-  console.log('photo: ', photo);
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.main_view}>

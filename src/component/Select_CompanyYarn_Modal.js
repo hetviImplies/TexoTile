@@ -37,8 +37,6 @@ import {ConditionContext} from '../screens/ConditionContext';
 import AppConstant from '../Utils/AppConstant';
 const {height, width} = Dimensions.get('window');
 
-
-
 const All_Yarn_Modal = ({
   visible,
   data,
@@ -93,16 +91,13 @@ const All_Yarn_Modal = ({
   function DisplayData(props) {
     return (
       <ScrollView
-      showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingLeft: '3%',
           paddingVertical: '2%',
-          paddingBottom:hp(20)
+          paddingBottom: hp(20),
         }}>
-        {(modal_Type === 'Company'
-          ? companyData
-          : yarnData
-        )?.map(a => {
+        {(modal_Type === 'Company' ? companyData : yarnData)?.map(a => {
           return (
             <TouchableOpacity
               onPress={() => {
@@ -119,8 +114,8 @@ const All_Yarn_Modal = ({
                       updated_at: a.updated_at,
                     },
                   }));
-                  setYarnSearch(null)
-                      setCompanySearch(null)
+                  setYarnSearch(null);
+                  setCompanySearch(null);
                   setYarn_name(a.name);
                   setSelectedValueYarn(a.id);
                   setValue(false);
@@ -137,8 +132,8 @@ const All_Yarn_Modal = ({
                       updated_at: a.updated_at,
                     },
                   }));
-                  setYarnSearch(null)
-                      setCompanySearch(null)
+                  setYarnSearch(null);
+                  setCompanySearch(null);
                   setCompany_name(a.name);
                   setSelectedValueCompany(a.id);
                   setValue(false);
@@ -276,8 +271,8 @@ const All_Yarn_Modal = ({
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {
-                      setYarnSearch(null)
-                      setCompanySearch(null)
+                      setYarnSearch(null);
+                      setCompanySearch(null);
                       setValue(false);
                       setYarn([]);
                     }}>
@@ -286,7 +281,7 @@ const All_Yarn_Modal = ({
                 </View>
               </View>
               <TextInput
-              cursorColor={Yellow}
+                cursorColor={Yellow}
                 placeholder="Search"
                 value={modal_Type == 'Yarn' ? yarnSearch : companySearch}
                 onChangeText={e => {
@@ -299,7 +294,7 @@ const All_Yarn_Modal = ({
                 style={styles.SearchBAr}></TextInput>
               {modal_Type === 'Company' ? (
                 CompanyPending &&
-                (companyData?.length === 0 || companyData?.length === 0) ? (
+                (companyData?.length === 0 || companyData === undefined) ? (
                   <ActivityIndicator
                     color={Yellow}
                     style={{marginTop: '50%'}}
@@ -309,30 +304,28 @@ const All_Yarn_Modal = ({
                 (yarnData?.length === 0 || yarnData === undefined) ? (
                 <ActivityIndicator color={Yellow} style={{marginTop: '50%'}} />
               ) : null}
-              {
-                modal_Type==="Yarn" ?
+              {modal_Type === 'Yarn' ? (
                 yarn?.length === 0 &&
-              yarnData?.length === 0 &&
-              YarnPending === false ? (
-                <View style={{alignItems: 'center', marginVertical: '45%'}}>
-                  <Text style={styles.text}>No User found</Text>
-                </View>
-              ) : (
-                <DisplayData/>
-              )
-              : null}
-              {
-                modal_Type==="Company" ?
-              companyData?.length === 0 &&
-              CompanyPending === false ? (
-                <View style={{alignItems: 'center', marginVertical: '45%'}}>
-                  <Text style={styles.text}>No User found</Text>
-                </View>
-              ) : (
-                <DisplayData/>
-              )
-              : null
-              }
+                yarnData?.length === 0 &&
+                YarnPending === false ? (
+                  <View style={{alignItems: 'center', marginVertical: '45%'}}>
+                    <Text style={styles.text}>No User found</Text>
+                  </View>
+                ) : (
+                  <DisplayData />
+                )
+              ) : null}
+              {modal_Type === 'Company' ? (
+                (companyData === undefined || companyData?.length === 0) &&
+                yarn?.length === 0 &&
+                CompanyPending === false ? (
+                  <View style={{alignItems: 'center', marginVertical: '45%'}}>
+                    <Text style={styles.text}>No User found</Text>
+                  </View>
+                ) : (
+                  <DisplayData />
+                )
+              ) : null}
             </View>
             {OpenModal()}
           </View>

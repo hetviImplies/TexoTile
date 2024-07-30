@@ -39,14 +39,6 @@ const QualitySlice = createSlice({
   initialState,
   reducers: {
     SearchData: (state, action) => {
-      // const dt = state.QualityData;
-      // const search = action.payload?.toLowerCase();
-      // if (search === '') {
-      //   state.QualityData = state.QualityOldDt;
-      // } else {
-      //   const data = dt?.filter(v => v.name?.toLowerCase().includes(search));
-      //   state.QualityData = data
-      // }
       const dt = state.QualityData;
     const search = action.payload;
     if (search === '') {
