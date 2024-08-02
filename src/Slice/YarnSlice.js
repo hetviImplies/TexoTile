@@ -5,7 +5,9 @@ import axios from 'axios';
 import {jsx} from 'react/jsx-runtime';
 import {URL} from '../URLs/URL';
 import {EndPoints} from '../URLs/EndPoints';
-import { GetAllCompanyDataAPI, GetAllYarnDataAPI, GetOneYarnAPI, YarnDataUpdateAPI } from '../services/YarnAPI';
+import { AddYarnCompanyAPI, AddYarnDataAPI, GetAllCompanyDataAPI, GetAllYarnDataAPI, GetOneYarnAPI, GetYarnActivityAPI, GetYarnQualityDataAPI, YarnDataUpdateAPI } from '../services/YarnAPI';
+
+
 const initialState = {
   YarnData: [],
   YarnPending: false,
@@ -63,55 +65,34 @@ export const YarnDataUpdate = createAsyncThunk(
 );
 
 export const AddYarnData = createAsyncThunk('Add Yarn data', async obj => {
-    const response = await axios.post(
-      `${URL}${EndPoints.AddYarnData}`,
-      obj,{
-        headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          validateStatus:false
-      }
-    );
-    return response.data
+    const response = await AddYarnDataAPI(obj)
+    return response
 });
 
 export const AddYarnCompany = createAsyncThunk(
   'Add Yarn Company',
   async obj => {
-    try {
-      const response = await axios.post(
-        `${URL}${EndPoints.AddYarnCompany}`,
-        obj,{
-          validateStatus:false
-        }
-      );
-      return response.data
-    } catch (error) {
-      throw error
-    }
+      const response = await AddYarnCompanyAPI(obj)
+      return response
   },
 );
 
 export const GetYarnQualityData = createAsyncThunk(
   'get Quality data from Yarn',
   async id => {
-    const response = await axios.get(
-      `${URL}${EndPoints.GetYarnQualityData}?yarn=${id}`,
-    );
-    return response.data.result.data;
+    const response = await GetYarnQualityDataAPI(id)
+    return response;
   },
 );
 
 export const GetYarnActivity = createAsyncThunk(
   'get Activity from Yarn',
   async ({id}) => {
-    const response = await axios.get(
-      `${URL}${EndPoints.GetYarnActivity}?yarn=${id}`,
-    );
-    return response.data.result;
+    const response = await GetYarnActivityAPI(id)
+    return response;
   },
 );
+
 const YarnSlice = createSlice({
   name: 'Yarn',
   initialState,

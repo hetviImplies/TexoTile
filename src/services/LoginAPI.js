@@ -1,12 +1,18 @@
 import {StyleSheet, Text, View} from 'react-native';
+
 import React from 'react';
 import axios from 'axios';
 import {URL} from '../URLs/URL';
 import {EndPoints} from '../URLs/EndPoints';
+
 const LoginAPI = async obj => {
   try {
     const response = await axios.post(`${URL}${EndPoints.LoginAPI}`, obj, {
       validateStatus: false,
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
     });
     return response.data;
   } catch (error) {

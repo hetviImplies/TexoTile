@@ -41,6 +41,7 @@ const CardView = ({
   data_forYarnUpdate,
 }) => {
   const [mainData, setMainData] = useState();
+  
   useEffect(() => {
     if (from == 'Yarn') {
       if (data_forYarnUpdate !== undefined && data_forYarnUpdate.length > 0) {
@@ -275,6 +276,7 @@ const CardView = ({
   useEffect(() => {
     GetData();
   }, [data]);
+
   const GetData = () => {
     let cost = 0;
     let weight = 0;
@@ -301,6 +303,7 @@ const CardView = ({
       }
     });
   };
+
   return (
     <View>
       {mainData !== undefined ? (

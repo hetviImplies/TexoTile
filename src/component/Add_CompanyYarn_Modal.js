@@ -168,7 +168,7 @@ export default Add_Modal;
 const styles = StyleSheet.create({
   textInput: {
     borderWidth: 1,
-    height: height / 20,
+    height: wp(11),
     borderRadius: 10,
     borderColor: 'rgba(217, 217, 217, 1)',
     paddingLeft: '8%',

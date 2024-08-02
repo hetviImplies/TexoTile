@@ -51,6 +51,7 @@ export const Logout = createAsyncThunk('logout User', async () => {
 const initialState = {
   GetProfileData: null,
 };
+
 const LoginAuthSlice = createSlice({
   name: 'LoginAuthSlice',
   initialState,

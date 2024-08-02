@@ -95,7 +95,7 @@ const Profile_Setting = props => {
         );
       },
     });
-  }, [props.navigation]);
+  }, [props.navigation,data]);
 
   const HandlePress = async () => {
     try {
@@ -202,7 +202,6 @@ const Profile_Setting = props => {
             Invalid email
           </Text>
         ) : null}
-
         <ButtonPress title={AppConstant.Save} func={HandlePress} />
       </View>
     </TouchableWithoutFeedback>

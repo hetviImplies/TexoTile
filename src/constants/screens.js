@@ -1,6 +1,5 @@
 export default {
     Login : "Login",
-    ConditionProvider : "ConditionProvider",
     VerifyPhone : "VerifyPhone",
     UpdateUser : "UpdateUser",
     Preference : "Preference",

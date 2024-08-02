@@ -69,5 +69,7 @@ export default {
     Logout : "Logout",
     SureLogout : 'Are you sure, do you want to logout?',
     Account : "Account",
-    Welcome_back : "Welcome back"
+    Welcome_back : "Welcome back",
+    YES : "Yes",
+    NO : "No"
 }

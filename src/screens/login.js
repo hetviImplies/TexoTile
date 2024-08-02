@@ -28,6 +28,7 @@ import TextComponent from '../component/TextComponent';
 import Backhandler from '../component/BackHandler';
 import Toast from '../component/Toast';
 import {hp, wp} from '../Global_Com/responsiveScreen';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import {
   Black,
   Cream_White,
@@ -56,7 +57,6 @@ const Login = props => {
   const [hasError, setHasError] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [index, setIndex] = useState(0);
-  console.log('index: ', index);
   const toastRef = useRef(null);
   const [num, setNum] = useState();
   const [min, setMin] = useState(1);
@@ -89,12 +89,11 @@ const Login = props => {
   function handleInputValue(phoneNumber) {
     setInputValue(phoneNumber);
   }
-  
+
   useEffect(() => {
     Handle()
     AsyncStorage.getItem('user').then(a => {
       const dt = JSON.parse(a);
-      console.log('t: ', dt);
       setNum('+' + dt.country_code + ' ' + dt.mobile_number);
     });
   }, [index]);
@@ -186,7 +185,8 @@ const Login = props => {
             mobile_number: inputValue.replace(/\s/g, ''),
           };
           try {
-            dispatch(LoginAuth(obj)).then(async res => {
+            await dispatch(LoginAuth(obj)).then(async res => {
+              console.log('res: ', res);
               if (res.meta.requestStatus == 'fulfilled') {
                 if (
                   res.payload.error === false &&
@@ -206,12 +206,12 @@ const Login = props => {
                 }
               } else {
                 setLoading(false);
-                handleError('Rejected !!!');
+                handleError(res.payload.message);
               }
             });
           } catch (error) {
             setLoading(false);
-            handleError(error);
+            handleError(error.message);
           }
         } else {
           setLoading(false);
@@ -359,10 +359,16 @@ const Login = props => {
       {loading ? <Activity_Indicator /> : null}
       <Toast ref={toastRef} />
       <LogoComponent />
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        alwaysBounceVertical={true}
-        contentContainerStyle={styles.formContainer}>
+      <KeyboardAwareScrollView
+        alwaysBounceVertical={false}
+            bounces={false}
+            enableOnAndroid={true}
+            contentContainerStyle={{
+              paddingBottom: wp(5),
+              paddingHorizontal: wp(6),
+            }}
+            showsVerticalScrollIndicator={false}
+        >
         <TextComponent
           main={
             index === 0
@@ -549,7 +555,7 @@ const Login = props => {
             ) : null}
           </>
         )}
-      </ScrollView>
+      </KeyboardAwareScrollView>
       <ButtonPress
         isDisable={loading}
         title={AppConstant.next}

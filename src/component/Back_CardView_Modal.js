@@ -7,15 +7,16 @@ import {
   View,
 } from 'react-native';
 import React from 'react';
-import { styleText } from '../assets/fonts/Fonts';
-import { Black, Transparent, White, Yellow } from '../Global_Com/color';
+import {styleText} from '../assets/fonts/Fonts';
+import {Black, Transparent, White, Yellow} from '../Global_Com/color';
+import AppConstant from '../Utils/AppConstant';
 const {height, width} = Dimensions.get('window');
 const BackModal_Detail = ({visible, setVisible, func}) => {
   return (
     <Modal animationType="slide" transparent={true} visible={visible}>
       <View style={styles.backgroundColor}>
         <View style={styles.view}>
-          <Text style={{fontSize: 16, color: Black,...styleText.semiBold}}>
+          <Text style={{fontSize: 16, color: Black, ...styleText.semiBold}}>
             Are you sure, you want to cancle this quality details?
           </Text>
           <View style={{flexDirection: 'row', marginTop: '6%'}}>
@@ -27,7 +28,9 @@ const BackModal_Detail = ({visible, setVisible, func}) => {
                   backgroundColor: '#EAEAEA',
                 },
               ]}>
-              <Text style={{color: Black, fontSize: 18,...styleText.semiBold}}>Cancle</Text>
+              <Text style={{color: Black, fontSize: 18, ...styleText.semiBold}}>
+                Cancle
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={func}
@@ -38,7 +41,9 @@ const BackModal_Detail = ({visible, setVisible, func}) => {
                   backgroundColor: Yellow,
                 },
               ]}>
-              <Text style={{color: White, fontSize: 18,...styleText.semiBold}}>Yes</Text>
+              <Text style={{color: White, fontSize: 18, ...styleText.semiBold}}>
+                {AppConstant.YES}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -70,6 +75,5 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
-
   },
 });

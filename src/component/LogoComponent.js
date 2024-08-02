@@ -18,7 +18,7 @@ export default LogoComponent
 
 const styles = StyleSheet.create({
     logoContainer: {
-        height: hp(10),
+        height: hp(14),
         width: wp(30),
         borderWidth: 0,
         alignSelf: 'center',

@@ -55,7 +55,7 @@ export const YarnDataUpdateAPI = async (id,obj) => {
   }
 };
 
-export const AddYarnDataAPI = async (id,obj) => {
+export const AddYarnDataAPI = async (obj) => {
   try {
     const response = await axios.post(
       `${URL}${EndPoints.AddYarnData}`,
@@ -73,36 +73,38 @@ export const AddYarnDataAPI = async (id,obj) => {
   }
 };
 
-export const CreateQualityAPI = async obj => {
+export const AddYarnCompanyAPI = async (obj) => {
   try {
-    const response = await axios.post(`${URL}${EndPoints.QualityCreate}`, obj, {
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      validateStatus: false,
-    });
-    return response.data;
+    const response = await axios.post(
+      `${URL}${EndPoints.AddYarnCompany}`,
+      obj,{
+        validateStatus:false
+      }
+    );
+    return response.data
   } catch (error) {
-    throw error;
+    throw error
   }
 };
 
-export const UpdateQualityAPI = async (data, id) => {
+export const GetYarnQualityDataAPI = async (id) => {
   try {
-    const res = await axios.put(
-      `${URL}${EndPoints.UpdateQualityData}?id=${id}`,
-      data,
-      {
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        validateStatus: false,
-      },
+    const response = await axios.get(
+      `${URL}${EndPoints.GetYarnQualityData}?yarn=${id}`,
     );
-    return res.data;
+    return response.data.result.data;
   } catch (error) {
-    throw error;
+    throw error
+  }
+};
+
+export const GetYarnActivityAPI = async (id) => {
+  try {
+    const response = await axios.get(
+      `${URL}${EndPoints.GetYarnActivity}?yarn=${id}`,
+    );
+    return response.data.result;
+  } catch (error) {
+    throw error
   }
 };

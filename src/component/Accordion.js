@@ -11,10 +11,10 @@ import React, {useEffect, useRef, useState} from 'react';
 import CheckBox from '@react-native-community/checkbox';
 
 import CardView from './CardView';
-import { isDate } from 'moment';
-import { hp, wp } from '../Global_Com/responsiveScreen';
-import { Black, White, Yellow } from '../Global_Com/color';
-import { Down_Arrow, Up_Arrow } from '../assets/svgs/svg';
+import {isDate} from 'moment';
+import {hp, wp} from '../Global_Com/responsiveScreen';
+import {Black, White, Yellow} from '../Global_Com/color';
+import {Down_Arrow, Up_Arrow} from '../assets/svgs/svg';
 
 const {height, width} = Dimensions.get('window');
 const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
@@ -27,15 +27,15 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
   const [total_beam_ends, setTotal_beam_ends] = useState(0);
   const [total_Pick, setTotal_Pick] = useState(0);
   const [total_width, setTotal_width] = useState(0);
-  const [warp_Data,setWarp_Data]=useState([])
-  const [weft_Data,setWeft_Data]=useState([])
-  const [isWarpUndefine,setIsWarpUndefine]=useState(false)
-  const [isWeftUndefine,setIsWeftUndefine]=useState(false)
+  const [warp_Data, setWarp_Data] = useState([]);
+  const [weft_Data, setWeft_Data] = useState([]);
+  const [isWarpUndefine, setIsWarpUndefine] = useState(false);
+  const [isWeftUndefine, setIsWeftUndefine] = useState(false);
   const animatedHeight = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    const warp = data.warp_data.filter((item) => item.yarn.id === id);
-    const weft = data.weft_data.filter((item) => item.yarn.id === id);
+    const warp = data.warp_data.filter(item => item.yarn.id === id);
+    const weft = data.weft_data.filter(item => item.yarn.id === id);
     setWarp_Data(warp);
     setWeft_Data(weft);
   }, [id, data]);
@@ -56,15 +56,14 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
 
   return (
     <View style={{}}>
-      <Animated.View
-        style={[styles.AnimatedView,{height: interpolation}]}>
+      <Animated.View style={[styles.AnimatedView, {height: interpolation}]}>
         <View style={{flexDirection: 'row'}}>
-          <View style={{flexDirection: 'column', flexGrow: 1,justifyContent:""}}>
+          <View style={{flexDirection: 'column', flexGrow: 1}}>
             <TouchableOpacity
               onPress={Toggle}
               style={{flexDirection: 'row', borderWidth: 0}}>
               <CheckBox
-                tintColors={{true : Yellow}}
+                tintColors={{true: Yellow}}
                 value={checkedItems.includes(data.id)}
                 onValueChange={() => toggleCheckbox(data.id)}
               />
@@ -73,7 +72,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   color: Black,
                   fontSize: wp(3.8),
                   marginLeft: '2%',
-                  marginTop:"1.3%"
+                  marginTop: '1.3%',
                 }}>
                 {data.name}
               </Text>
@@ -83,7 +82,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   alignItems: 'flex-end',
                   flexGrow: 1,
                   height: hp(3),
-                  marginTop:"1%"
+                  marginTop: '1%',
                 }}>
                 <View
                   style={{
@@ -91,19 +90,19 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                     flexDirection: 'row',
                     marginRight: '2%',
                     height: wp(6.5),
-                    alignItems:"center"
+                    alignItems: 'center',
                   }}>
-                  <Text style={{color: Black,fontSize: wp(3.3)}}>Kg : {data.weight}</Text>
+                  <Text style={{color: Black, fontSize: wp(3.3)}}>
+                    Kg : {data.weight}
+                  </Text>
                   <View
                     style={{
-                      borderRightWidth:1,
+                      borderRightWidth: 1,
                       marginHorizontal: '4%',
                       borderColor: 'grey',
                       height: height / 35,
                     }}></View>
-                  <Text style={{color: Black}}>
-                    ₹ : {data.quality_cost}
-                  </Text>
+                  <Text style={{color: Black}}>₹ : {data.quality_cost}</Text>
                   <View
                     style={{
                       justifyContent: 'center',
@@ -111,9 +110,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                       height: height / 35,
                       marginLeft: '1.5%',
                     }}>
-                    {
-                    show ? <Up_Arrow/>  :  <Down_Arrow />
-                    }
+                    {show ? <Up_Arrow /> : <Down_Arrow />}
                   </View>
                 </View>
               </View>
@@ -127,7 +124,6 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   marginHorizontal: '2%',
                 }}>
                 <View style={{flexDirection: 'column', borderWidth: 0}}>
-
                   <CardView
                     setTotal_beam_ends={setTotal_beam_ends}
                     setWeft_Weight={setWeft_Weight}
@@ -179,8 +175,8 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
 export default Accordion;
 
 const styles = StyleSheet.create({
-  AnimatedView:{
-borderWidth: 0,
+  AnimatedView: {
+    borderWidth: 0,
     backgroundColor: White,
     marginHorizontal: '5%',
     marginTop: '2%',
@@ -192,5 +188,5 @@ borderWidth: 0,
     shadowRadius: 1,
     elevation: 5,
     flexDirection: 'column',
-  }
+  },
 });

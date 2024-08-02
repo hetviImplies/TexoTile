@@ -14,6 +14,8 @@ import {
   Photo_Background_Color,
   TextInput_Border_Color,
 } from '../Global_Com/color';
+import { hp, wp } from '../Global_Com/responsiveScreen';
+import { styleText } from '../assets/fonts/Fonts';
 const {height, width} = Dimensions.get('window');
 const Photos = ({title, onPress, photo, onPressDelete}) => {
 
@@ -76,7 +78,7 @@ const styles = StyleSheet.create({
   text: {
     color: Black,
     marginTop: '2%',
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: hp(2),
+    ...styleText.bold
   },
 });

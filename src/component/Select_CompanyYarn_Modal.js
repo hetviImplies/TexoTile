@@ -23,11 +23,12 @@ import Add_Modal from './Add_CompanyYarn_Modal';
 import {styleText} from '../assets/fonts/Fonts';
 import SeachBar from './SeachBar';
 import {Modal} from 'react-native';
-import {Add_Black, Add_Yellow, Close_Black} from '../assets/svgs/svg';
-import {hp} from '../Global_Com/responsiveScreen';
+import {Add_Black, Add_Yellow, Close_Black, Search} from '../assets/svgs/svg';
+import {hp, wp} from '../Global_Com/responsiveScreen';
 import {
   Black,
   Border_Color,
+  Red,
   TextInput_Border_Color,
   Transparent,
   White,
@@ -292,6 +293,9 @@ const All_Yarn_Modal = ({
                   }
                 }}
                 style={styles.SearchBAr}></TextInput>
+              <View style={{position: 'absolute', top: wp(13.3), left: wp(4)}}>
+                <Search />
+              </View>
               {modal_Type === 'Company' ? (
                 CompanyPending &&
                 (companyData?.length === 0 || companyData === undefined) ? (
@@ -345,7 +349,7 @@ const styles = StyleSheet.create({
   },
   SearchBAr: {
     borderWidth: 1,
-    paddingLeft: '5%',
+    paddingLeft: wp(13),
     height: hp(6),
     borderRadius: 15,
     marginTop: '5%',

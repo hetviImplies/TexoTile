@@ -237,7 +237,9 @@ const Yarn = ({navigation}) => {
                         }}>
                         <TouchableOpacity
                           onPress={async () => {
+                            setLoading(true)
                             await dispatch(GetYarnQualityData(a.id));
+                            setLoading(false)
                             navigation.navigate(screens.UpdateYarn, {data: a});
                           }}>
                           <Edit_Logo height={30} width={30} />
@@ -245,7 +247,9 @@ const Yarn = ({navigation}) => {
                         <TouchableOpacity
                           style={{marginLeft: '8%'}}
                           onPress={async () => {
+                            setLoading(true)
                             await dispatch(GetYarnActivity({id: a.id}));
+                            setLoading(false)
                             setShowYarnActivityModal(true);
                           }}>
                           <History_Logo height={30} width={30} />

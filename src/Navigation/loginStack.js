@@ -87,9 +87,6 @@ const LoginStack = () => {
                 component={Login}
                 name={screens.Login}></stack.Screen>
               <stack.Screen
-                component={ConditionProvider}
-                name={screens.ConditionProvider}></stack.Screen>
-              <stack.Screen
                 component={Preference}
                 name={screens.Preference}></stack.Screen>
               <stack.Screen

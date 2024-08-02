@@ -32,6 +32,7 @@ export const CreateQualityAPI = async obj => {
 };
 
 export const UpdateQualityAPI = async (data, id) => {
+  console.log('data: ', data);
   try {
     const res = await axios.put(
       `${URL}${EndPoints.UpdateQualityData}?id=${id}`,
@@ -45,6 +46,7 @@ export const UpdateQualityAPI = async (data, id) => {
       },
     );
     return res.data;
+
   } catch (error) {
     throw error;
   }

@@ -61,7 +61,8 @@ import {Validation_YarnData} from '../Utils/Regex';
 const {height, width} = Dimensions.get('window');
 const QualityDetail = props => {
   const data = props.route.params?.data;
-  let QualityFormData = new FormData()
+  let QualityFormData = new FormData();
+
   const [loading, setLoading] = useState(false);
   const [qualityName, setQualityName] = useState('');
   const [value, setValue] = useState('first');
@@ -266,69 +267,120 @@ const QualityDetail = props => {
     );
   }, [Warp_Weight, Weft_Weight]);
 
-  QualityFormData.append('name',qualityName)
-  QualityFormData.append('weight',quality_weight)
-  QualityFormData.append('quality_cost',quality_cost)
-  QualityFormData.append('total_beam_ends',total_beam_ends.toFixed(2).toString())
-  QualityFormData.append('total_pick',total_Pick.toFixed(2))
-  QualityFormData.append('total_width',total_width?.toFixed(2))
-  QualityFormData.append('total_warp_weight',Warp_Weight.toFixed(2))
-  QualityFormData.append('total_warp_cost',Warp_Cost.toFixed(2))
-  QualityFormData.append('total_weft_weight',Weft_Weight.toString())
-  QualityFormData.append('total_weft_cost',Weft_Cost.toString())
-  QualityFormData.append('expense_type',value == 'first' ? AppConstant.Fixed_Cost : AppConstant.Per_Pick)
-  QualityFormData.append('total_efficiency',parseFloat(total_Efficiency).toFixed(2))
-  QualityFormData.append('efficiency',parseFloat(efficiency).toFixed(2))
-  QualityFormData.append('machine',machine.toString())
-  QualityFormData.append('cost',value == 'first' ? '0.00' : Expense_Cost)
-  QualityFormData.append('expense_cost',ExpenseCost?.toString())
-  QualityFormData.append('panno',parseFloat(Width).toFixed(2))
-  QualityFormData.append('reed',reed)
-  QualityFormData.append('rpm',RPM)
-  QualityFormData.append('letis',lattice)
-  QualityFormData.append('border',border)
-  QualityFormData.append('nozzle',nozzle)
-  QualityFormData.append('pasramani',pasramani)
-  QualityFormData.append('steam_weft',steam_weft)
-  QualityFormData.append('steam_warp',steam_warp)
-  QualityFormData.append('gsm',gsm)
+  QualityFormData.append('name', qualityName);
+  QualityFormData.append('weight', quality_weight);
+  QualityFormData.append('quality_cost', quality_cost);
+  QualityFormData.append(
+    'total_beam_ends',
+    total_beam_ends.toFixed(2).toString(),
+  );
+  QualityFormData.append('total_pick', total_Pick.toFixed(2));
+  QualityFormData.append('total_width', total_width?.toFixed(2));
+  QualityFormData.append('total_warp_weight', Warp_Weight.toFixed(2));
+  QualityFormData.append('total_warp_cost', Warp_Cost.toFixed(2));
+  QualityFormData.append('total_weft_weight', Weft_Weight.toString());
+  QualityFormData.append('total_weft_cost', Weft_Cost.toString());
+  QualityFormData.append(
+    'expense_type',
+    value == 'first' ? AppConstant.Fixed_Cost : AppConstant.Per_Pick,
+  );
+  QualityFormData.append(
+    'total_efficiency',
+    parseFloat(total_Efficiency).toFixed(2),
+  );
+  QualityFormData.append('efficiency', parseFloat(efficiency).toFixed(2));
+  QualityFormData.append('machine', machine.toString());
+  QualityFormData.append('cost', value == 'first' ? '0.00' : Expense_Cost);
+  QualityFormData.append('expense_cost', ExpenseCost?.toString());
+  QualityFormData.append('panno', parseFloat(Width).toFixed(2));
+  QualityFormData.append('reed', reed);
+  QualityFormData.append('rpm', RPM);
+  QualityFormData.append('letis', lattice);
+  QualityFormData.append('border', border);
+  QualityFormData.append('nozzle', nozzle);
+  QualityFormData.append('pasramani', pasramani);
+  QualityFormData.append('steam_weft', steam_weft);
+  QualityFormData.append('steam_warp', steam_warp);
+  QualityFormData.append('gsm', gsm);
 
-  pasramani_Pattern!==null ? QualityFormData.append('pasramani_pattern',Object.keys(pasramani_Pattern).length !== 0 ? {
-    uri: pasramani_Pattern,
-    type: pasramani_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern?.split('.')?.pop()}`,
-    name : pasramani_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
-  } : pasramani_Pattern ) : null
 
-  sample!==null ? QualityFormData.append('sample',Object.keys(sample).length !== 0 ? {
-    uri: sample,
-    type: sample?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${sample?.split('.')?.pop()}`,
-    name : sample?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
-  } : sample ) : null
+  pasramani_Pattern !== null
+    ? QualityFormData.append(
+        'pasramani_pattern',
+        !pasramani_Pattern?.startsWith('http')
+          ? {
+              uri: pasramani_Pattern,
+              type: pasramani_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'application/pdf'
+                : `image/${pasramani_Pattern?.split('.')?.pop()}`,
+              name: pasramani_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'PDF'
+                : `IMAGE`,
+            }
+          : pasramani_Pattern,
+      )
+    : null;
 
-  pick_Pattern!==null ? QualityFormData.append('pick_pattern',Object.keys(pick_Pattern).length !== 0 ? {
-    uri: pick_Pattern,
-    type: pick_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pick_Pattern?.split('.')?.pop()}`,
-    name : pick_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
-  } : pick_Pattern ) : null
+  sample !== null
+    ? QualityFormData.append(
+        'sample',
+        !sample?.startsWith('http')
+          ? {
+              uri: sample,
+              type: sample?.toLowerCase()?.endsWith('.pdf')
+                ? 'application/pdf'
+                : `image/${sample?.split('.')?.pop()}`,
+              name: sample?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`,
+            }
+          : sample,
+      )
+    : null;
 
-  lattice_Pattern!==null ? QualityFormData.append('latis_pattern',Object.keys(lattice_Pattern).length !== 0 ? {
-    uri: lattice_Pattern,
-    type: lattice_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'application/pdf' : `image/${pasramani_Pattern?.split('.')?.pop()}`,
-    name : lattice_Pattern?.toLowerCase()?.endsWith('.pdf') ? 'PDF' : `IMAGE`
-  } : lattice_Pattern ) : null
+  pick_Pattern !== null
+    ? QualityFormData.append(
+        'pick_pattern',
+        !pick_Pattern?.startsWith('http')
+          ? {
+              uri: pick_Pattern,
+              type: pick_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'application/pdf'
+                : `image/${pick_Pattern?.split('.')?.pop()}`,
+              name: pick_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'PDF'
+                : `IMAGE`,
+            }
+          : pick_Pattern,
+      )
+    : null;
+
+  lattice_Pattern !== null
+    ? QualityFormData.append(
+        'latis_pattern',
+        !lattice_Pattern?.startsWith('http')
+          ? {
+              uri: lattice_Pattern,
+              type: lattice_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'application/pdf'
+                : `image/${pasramani_Pattern?.split('.')?.pop()}`,
+              name: lattice_Pattern?.toLowerCase()?.endsWith('.pdf')
+                ? 'PDF'
+                : `IMAGE`,
+            }
+          : lattice_Pattern,
+      )
+    : null;
 
   final_Warp_Data.forEach((item, index) => {
     for (const key in item) {
-        QualityFormData.append(`warp_data[${index}][${key}]`, item[key]);
+      QualityFormData.append(`warp_data[${index}][${key}]`, item[key]);
     }
   });
 
   final_Weft_Data.forEach((item, index) => {
     for (const key in item) {
-        QualityFormData.append(`weft_data[${index}][${key}]`, item[key]);
+      QualityFormData.append(`weft_data[${index}][${key}]`, item[key]);
     }
   });
-
 
   // const QualityData = {
   //   name: qualityName.toString(),
@@ -365,7 +417,6 @@ const QualityDetail = props => {
   //   ...(pick_Pattern ? {pick_pattern: pick_Pattern} : null),
   //   ...(lattice_Pattern ? {latis_pattern: lattice_Pattern} : null),
   // };
-
 
   useEffect(() => {
     if (value == 'first') {
@@ -446,20 +497,17 @@ const QualityDetail = props => {
     setSave(true);
     setLoading(true);
     try {
-      if (
-        qualityName != '' &&
-        warp_data.length > 0 &&
-        weft_data.length > 0
-      ) {
+      if (qualityName != '' && warp_data.length > 0 && weft_data.length > 0) {
         if (data === undefined) {
           setSave(false);
-          await dispatch(CreateQualityData(QualityFormData)).then(a => { //QualityData
+          await dispatch(CreateQualityData(QualityFormData)).then(async a => {
+            //QualityData
             if (a.payload.error) {
               setLoading(false);
               handleError(a.payload.message);
             } else {
               setLoading(false);
-              dispatch(GetQualityData());
+              await dispatch(GetQualityData());
               return props.navigation.navigate(screens.Tabs);
             }
           });
@@ -467,13 +515,13 @@ const QualityDetail = props => {
           setSave(false);
           await dispatch(
             UpdateQualityData({data: QualityFormData, id: data.id}),
-          ).then(a => {
+          ).then(async a => {
             if (a.error) {
               setLoading(false);
               handleError(a.message);
             } else {
               setLoading(false);
-              dispatch(GetQualityData());
+              await dispatch(GetQualityData());
               return props.navigation.reset({
                 index: 0,
                 routes: [{name: screens.Tabs}],
@@ -485,7 +533,11 @@ const QualityDetail = props => {
         setLoading(false);
       }
     } catch (error) {
-      console.log('error123: ', error);
+      console.log('error...: ',error.response.data);
+console.log('error...1: ',error.response.status);
+console.log('error...2: ',error.response.headers);
+console.log('error...3: ',error.request);
+console.log('error...4', error.message);
       setLoading(false);
       handleError(error.message);
     }
@@ -500,39 +552,44 @@ const QualityDetail = props => {
     [toastRef],
   );
 
-  const requestCameraPermission = async (callback) => {
-      if (Platform.OS === AppConstant.ANDROID) {
-        const requestCameraPermissionstatus = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.CAMERA,
-          {
-            title: AppConstant.Camera_Permission,
-            message: 'This app needs access to your camera',
-            buttonNeutral: AppConstant.AskMeLater,
-            buttonNegative: AppConstant.CANCEL,
-            buttonPositive: AppConstant.OK,
-          },
-        )
-        setCameraPermission(requestCameraPermissionstatus === AppConstant.GRANTED);
-        console.log('requestCameraPermissionstatus: ', requestCameraPermissionstatus);
+  const requestCameraPermission = async callback => {
+    if (Platform.OS === AppConstant.ANDROID) {
+      const requestCameraPermissionstatus = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: AppConstant.Camera_Permission,
+          message: 'This app needs access to your camera',
+          buttonNeutral: AppConstant.AskMeLater,
+          buttonNegative: AppConstant.CANCEL,
+          buttonPositive: AppConstant.OK,
+        },
+      );
+      setCameraPermission(
+        requestCameraPermissionstatus === AppConstant.GRANTED,
+      );
+      console.log(
+        'requestCameraPermissionstatus: ',
+        requestCameraPermissionstatus,
+      );
 
-        if(requestCameraPermissionstatus===AppConstant.GRANTED){
-          setCameraPermission(true)
-          callback(true)
-        }else {
-          setCameraPermission(false);
-          callback(false);
-        }
+      if (requestCameraPermissionstatus === AppConstant.GRANTED) {
+        setCameraPermission(true);
+        callback(true);
       } else {
-        // iOS permission handling
-        const cameraPermissionStatus =
-          await ImagePicker.requestCameraPermission();
-        setCameraPermission(cameraPermissionStatus === AppConstant.GRANTED);
+        setCameraPermission(false);
+        callback(false);
       }
-  }
+    } else {
+      // iOS permission handling
+      const cameraPermissionStatus =
+        await ImagePicker.requestCameraPermission();
+      setCameraPermission(cameraPermissionStatus === AppConstant.GRANTED);
+    }
+  };
 
-  const handleTakePhoto = async() => {
+  const handleTakePhoto = async () => {
     if (!cameraPermission) {
-      await requestCameraPermission(async(granted) => {
+      await requestCameraPermission(async granted => {
         if (granted) {
           const options = {
             title: 'Take a Photo',
@@ -544,24 +601,23 @@ const QualityDetail = props => {
             },
           };
 
-          launchCamera(options, async(response) => {
+          launchCamera(options, async response => {
             if (response.didCancel) {
               console.log('User cancelled image picker');
             } else if (response.error) {
               console.log('ImagePicker Error: ', response.error);
             } else {
               const source = response?.assets[0].uri;
-              console.log('response?.assets[0]: ', response?.assets[0]);
-          if (photo_Index === 0) {
-            setSample(source);
-          } else if (photo_Index === 1) {
-            setLattice_Pattern(source);
-          } else if (photo_Index === 2) {
-            setPick_Pattern(source);
-          } else if (photo_Index === 3) {
-            setPasramani_Pattern(source);
-          }
-          await bottomSheet2.current.close();
+              if (photo_Index === 0) {
+                setSample(source);
+              } else if (photo_Index === 1) {
+                setLattice_Pattern(source);
+              } else if (photo_Index === 2) {
+                setPick_Pattern(source);
+              } else if (photo_Index === 3) {
+                setPasramani_Pattern(source);
+              }
+              await bottomSheet2.current.close();
             }
           });
         } else {
@@ -569,16 +625,16 @@ const QualityDetail = props => {
           await bottomSheet2.current.close();
         }
       });
-    }else{
-    const options = {
-      title: 'Take a Photo',
-      takePhotoButtonTitle: 'Take a Photo',
-      mediaType: 'photo',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
+    } else {
+      const options = {
+        title: 'Take a Photo',
+        takePhotoButtonTitle: 'Take a Photo',
+        mediaType: 'photo',
+        storageOptions: {
+          skipBackup: true,
+          path: 'images',
+        },
+      };
       launchCamera(options, async response => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
@@ -598,12 +654,13 @@ const QualityDetail = props => {
           }
           await bottomSheet2.current.close();
         }
-      });}
+      });
+    }
   };
 
-  const handleChoosePhoto = async() => {
+  const handleChoosePhoto = async () => {
     if (!galleryPermission) {
-      await requestGalleryPermission(async(granted) => {
+      await requestGalleryPermission(async granted => {
         if (granted) {
           const options = {
             title: 'Select Image',
@@ -612,7 +669,7 @@ const QualityDetail = props => {
               path: 'images',
             },
           };
-          launchImageLibrary(options, async(response) => {
+          launchImageLibrary(options, async response => {
             if (response.didCancel) {
               console.log('User cancelled image picker');
             } else if (response.error) {
@@ -634,11 +691,11 @@ const QualityDetail = props => {
             }
           });
         } else {
-          Alert.alert('Gallery permission denied');await bottomSheet2.current.close();
-
+          Alert.alert('Gallery permission denied');
+          await bottomSheet2.current.close();
         }
       });
-    }else{
+    } else {
       const options = {
         title: 'Select Image',
         storageOptions: {
@@ -667,11 +724,11 @@ const QualityDetail = props => {
           }
           await bottomSheet2.current.close();
         }
-      });}
+      });
+    }
   };
 
-
-  const requestGalleryPermission = async (callback) => {
+  const requestGalleryPermission = async callback => {
     if (Platform.OS === AppConstant.ANDROID) {
       const galleryPermissionStatus = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
@@ -874,7 +931,8 @@ const QualityDetail = props => {
                   maxWidth: wp(90),
                   flexWrap: 'wrap',
                 }}>
-                <View
+                <TouchableOpacity
+                  onPress={() => setValue('first')}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -897,9 +955,10 @@ const QualityDetail = props => {
                     }}>
                     {AppConstant.Fixed_Cost}
                   </Text>
-                </View>
+                </TouchableOpacity>
 
-                <View
+                <TouchableOpacity
+                  onPress={() => setValue('second')}
                   style={{
                     flexDirection: 'row',
                     alignItems: 'center',
@@ -920,7 +979,7 @@ const QualityDetail = props => {
                     }}>
                     {AppConstant.Per_Pick}
                   </Text>
-                </View>
+                </TouchableOpacity>
               </View>
             </RadioButton.Group>
           </View>
@@ -942,7 +1001,7 @@ const QualityDetail = props => {
               outlineColor="rgba(45, 48, 61, 0.1)"
               activeOutlineColor={Yellow}
               outlineStyle={{
-                borderRadius: 20,
+                borderRadius: 15,
                 backgroundColor: White,
                 height: hp(5),
                 width: width / 4,
@@ -1036,7 +1095,7 @@ const QualityDetail = props => {
               justifyContent: 'center',
             }}>
             <Production_Input
-            IsDisable={false}
+              IsDisable={false}
               func={i => (P_input1 = i)}
               onSubmitEditing={() => P_input2.focus()}
               returnKeyType="next"
@@ -1046,7 +1105,7 @@ const QualityDetail = props => {
               lable={AppConstant.RPM}
             />
             <Production_Input
-            IsDisable={false}
+              IsDisable={false}
               func={i => (P_input2 = i)}
               returnKeyType="next"
               returnKeyLabel="next"
@@ -1056,7 +1115,7 @@ const QualityDetail = props => {
               lable={AppConstant.Efficiency}
             />
             <Production_Input
-            IsDisable={false}
+              IsDisable={false}
               func={i => (P_input3 = i)}
               returnKeyType="done"
               returnKeyLabel="done"
@@ -1066,7 +1125,7 @@ const QualityDetail = props => {
               lable={AppConstant.Machine}
             />
             <Production_Input
-            IsDisable={true}
+              IsDisable={true}
               func={i => (P_input4 = i)}
               returnKeyType="done"
               returnKeyLabel="done"
@@ -1389,7 +1448,7 @@ const styles = StyleSheet.create({
   text: {
     color: Black,
     ...styleText.semiBold,
-    fontSize: hp(1.9),
+    fontSize: hp(2),
     maxWidth: wp(25),
     flexWrap: 'wrap',
   },
