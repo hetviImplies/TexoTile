@@ -40,8 +40,8 @@ const CardView = ({
   setModal_Type,
   data_forYarnUpdate,
 }) => {
-  const [mainData, setMainData] = useState();
-  
+  const [mainData, setMainData] = useState(); 
+
   useEffect(() => {
     if (from == 'Yarn') {
       if (data_forYarnUpdate !== undefined && data_forYarnUpdate.length > 0) {

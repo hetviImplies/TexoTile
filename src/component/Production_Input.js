@@ -2,7 +2,7 @@ import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React, { useRef } from 'react'
 import { TextInput } from 'react-native-paper'
 
-import { Border_Color, TextInput_Border_Color, White, Yellow } from '../Global_Com/color';
+import { Black, Border_Color, TextInput_Border_Color, White, Yellow } from '../Global_Com/color';
 import { Validation } from '../Utils/Regex';
 const {height, width} = Dimensions.get('window');
 const Production_Input = ({value,IsDisable,setValue,lable,returnKeyType,func,onSubmitEditing,returnKeyLabel}) => {
@@ -10,6 +10,7 @@ const Production_Input = ({value,IsDisable,setValue,lable,returnKeyType,func,onS
   return (
     <TextInput
     disabled={IsDisable}
+    textColor={Black}
     dense
     mode="outlined"
     label={lable}

@@ -31,7 +31,8 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
   const [weft_Data, setWeft_Data] = useState([]);
   const [isWarpUndefine, setIsWarpUndefine] = useState(false);
   const [isWeftUndefine, setIsWeftUndefine] = useState(false);
-  const animatedHeight = useRef(new Animated.Value(0)).current;
+  const [contentHeight, setContentHeight] = useState(34); // Start with a default height
+  const animatedHeight = useRef(new Animated.Value(34)).current;
 
   useEffect(() => {
     const warp = data.warp_data.filter(item => item.yarn.id === id);
@@ -49,6 +50,14 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
     }).start();
   };
 
+  const handleLayout = event => {
+    const { height } = event.nativeEvent.layout;
+    if (contentHeight !== height) {
+      setContentHeight(height);
+      animatedHeight.setValue(height); // Set initial height to content height
+    }
+  };
+
   const interpolation = animatedHeight.interpolate({
     inputRange: [0, 1],
     outputRange: [34, 10],
@@ -61,6 +70,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
           <View style={{flexDirection: 'column', flexGrow: 1}}>
             <TouchableOpacity
               onPress={Toggle}
+              onLayout={handleLayout}
               style={{flexDirection: 'row', borderWidth: 0}}>
               <CheckBox
                 tintColors={{true: Yellow}}
@@ -73,6 +83,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   fontSize: wp(3.8),
                   marginLeft: '2%',
                   marginTop: '1.3%',
+                  maxWidth:wp(20)
                 }}>
                 {data.name}
               </Text>
@@ -81,7 +92,6 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                   borderWidth: 0,
                   alignItems: 'flex-end',
                   flexGrow: 1,
-                  height: hp(3),
                   marginTop: '1%',
                 }}>
                 <View
@@ -89,10 +99,9 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                     borderWidth: 0,
                     flexDirection: 'row',
                     marginRight: '2%',
-                    height: wp(6.5),
                     alignItems: 'center',
                   }}>
-                  <Text style={{color: Black, fontSize: wp(3.3)}}>
+                  <Text style={{color: Black, fontSize: wp(3.3),maxWidth:wp(20)}}>
                     Kg : {data.weight}
                   </Text>
                   <View
@@ -102,7 +111,7 @@ const Accordion = ({data, checkedItems, toggleCheckbox, id, from}) => {
                       borderColor: 'grey',
                       height: height / 35,
                     }}></View>
-                  <Text style={{color: Black}}>₹ : {data.quality_cost}</Text>
+                  <Text style={{color: Black,maxWidth:wp(20)}}>₹ : {data.quality_cost}</Text>
                   <View
                     style={{
                       justifyContent: 'center',

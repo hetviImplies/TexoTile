@@ -238,6 +238,7 @@ const QualityDetail = props => {
 
   useEffect(() => {
     const updatedFinalWeftData = weft_data?.map(item => {
+      // console.log('weft_data: ', weft_data);
       const {company, yarn, id, ...rest} = item;
       const Company_Id = company.id;
       const Yarn_Id = yarn.id;

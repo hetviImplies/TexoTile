@@ -40,7 +40,6 @@ const YarnModal = ({
   setEditWarpData,
   setEditWeftData,
 }) => {
-
   const [showYarnModal, setShowYarnModal] = useState(false);
   const [yarn_name, setYarn_name] = useState('Select Yarn name');
   const [yarn_Rate, setYarn_Rate] = useState();
@@ -151,17 +150,26 @@ const YarnModal = ({
     );
   };
 
-  const DataCreate = () => {
+
+  const DataCreate = async() => {
     let obj = {};
-    if (modal_T == 'Warp') {
+    if (modal_T === 'Warp') {
       obj = Warp_Data;
+      setData([...data, obj]);
     } else {
-      obj = Weft_Data;
+      const updatedData = data.map(item => ({
+
+        ...item,
+        width: Weft_Data.width,
+      }));
+      console.log('item: ', updatedData);
+
+      setData([...updatedData, Weft_Data]);
     }
-    setData([...data, obj]);
+    SetWidth(Weft_Data.width)
   };
 
-  const HandlePress = () => {
+  const HandlePress = async() => {
     if (Warp_Data.id != null || Weft_Data.id != null) {
       const isCreateData = data.find((a, i) => i == index);
       if (isCreateData != undefined) {
@@ -203,13 +211,13 @@ const YarnModal = ({
           }
           return {
             ...item,
-            width: Weft_Data.width
+            width: Weft_Data.width,
           };
         });
-        SetWidth(Weft_Data.width)
+        SetWidth(Weft_Data.width);
         setData(updatedData);
       } else {
-        DataCreate();
+         DataCreate();
       }
     } else {
       const isCreateData = data.find((a, i) => i == index);
@@ -264,7 +272,7 @@ const YarnModal = ({
   };
 
   useEffect(() => {
-   modal_T=="Weft" ? Weft_Data_Input() : null
+    modal_T == 'Weft' ? Weft_Data_Input() : null;
   }, [
     Weft_Data.yarn_rate,
     Weft_Data.deniar,
@@ -274,20 +282,25 @@ const YarnModal = ({
     Weft_Data.wastage,
     Weft_Data.company,
     Weft_Data.yarn,
-    Weft_Data.tpm
+    Weft_Data.tpm,
   ]);
 
   const Weft_Data_Input = () => {
-    if(editData){
+    if (editData) {
       console.log('hh');
       if (
-        (Weft_Data.deniar!= '' && Weft_Data.deniar!== editData.data.deniar) ||
-        (Weft_Data.pick!= '' && Weft_Data.pick!== editData.data.pick) ||
-        (Weft_Data.width!= '' && Weft_Data.width!== editData.data.width) ||
-        (Weft_Data.yarn_rate!= '' && Weft_Data.yarn_rate!== editData.data.yarn_rate) ||
-        (Weft_Data.wastage!= '' && Weft_Data.wastage!== editData.data.wastage) ||
-        (Weft_Data.company.name != '' &&  Weft_Data.company.name !== editData.data.company.name) ||
-        (Weft_Data.yarn.name != '' && Weft_Data.yarn.name !== editData.data.yarn.name) || Weft_Data.tpm !== editData.data.tpm
+        (Weft_Data.deniar != '' && Weft_Data.deniar !== editData.data.deniar) ||
+        (Weft_Data.pick != '' && Weft_Data.pick !== editData.data.pick) ||
+        (Weft_Data.width != '' && Weft_Data.width !== editData.data.width) ||
+        (Weft_Data.yarn_rate != '' &&
+          Weft_Data.yarn_rate !== editData.data.yarn_rate) ||
+        (Weft_Data.wastage != '' &&
+          Weft_Data.wastage !== editData.data.wastage) ||
+        (Weft_Data.company.name != '' &&
+          Weft_Data.company.name !== editData.data.company.name) ||
+        (Weft_Data.yarn.name != '' &&
+          Weft_Data.yarn.name !== editData.data.yarn.name) ||
+        Weft_Data.tpm !== editData.data.tpm
       ) {
         console.log('Weft_Data disable is false');
         setIsDisable(false);
@@ -295,14 +308,14 @@ const YarnModal = ({
         console.log('Weft_Data disable is true');
         setIsDisable(true);
       }
-    }else{
+    } else {
       console.log('hh2');
       if (
-        Weft_Data.deniar!= '' &&
-        Weft_Data.pick!= '' &&
-        Weft_Data.width!= '' &&
-        Weft_Data.yarn_rate!= '' &&
-        Weft_Data.wastage!= '' &&
+        Weft_Data.deniar != '' &&
+        Weft_Data.pick != '' &&
+        Weft_Data.width != '' &&
+        Weft_Data.yarn_rate != '' &&
+        Weft_Data.wastage != '' &&
         Weft_Data.company.name != '' &&
         Weft_Data.yarn.name != ''
       ) {
@@ -317,10 +330,10 @@ const YarnModal = ({
     Weft_GetWeightAndCost();
   }, [
     Weft_Data.deniar,
-      Weft_Data.pick,
-      Weft_Data.width,
-      Weft_Data.yarn_rate,
-      Weft_Data.wastage,
+    Weft_Data.pick,
+    Weft_Data.width,
+    Weft_Data.yarn_rate,
+    Weft_Data.wastage,
   ]);
 
   const Weft_GetWeightAndCost = () => {
@@ -343,7 +356,7 @@ const YarnModal = ({
   };
 
   useEffect(() => {
-    modal_T==="Warp" ? Warp_Data_Input() : null
+    modal_T === 'Warp' ? Warp_Data_Input() : null;
   }, [
     Warp_Data.deniar,
     Warp_Data.yarn_rate,
@@ -351,25 +364,32 @@ const YarnModal = ({
     Warp_Data.shortage,
     Warp_Data.yarn,
     Warp_Data.company,
-    Warp_Data.tpm
+    Warp_Data.tpm,
   ]);
 
   const Warp_Data_Input = () => {
-    if(editData){
-      if((Warp_Data.deniar!= '' && Warp_Data.deniar!== editData.data.deniar) ||
-      (Warp_Data.beam_ends!= '' && Warp_Data.beam_ends!= editData.data.beam_ends) ||
-      (Warp_Data.shortage!= '' && Warp_Data.shortage!== editData.data.shortage) ||
-      (Warp_Data.yarn_rate!= '' && Warp_Data.yarn_rate!== editData.data.yarn_rate) ||
-      (Warp_Data.company.name != '' &&  Warp_Data.company.name !== editData.data.company.name) ||
-      (Warp_Data.yarn.name != '' && Warp_Data.yarn.name !== editData.data.yarn.name) || Warp_Data.tpm !== editData.data.tpm)
-      {
+    if (editData) {
+      if (
+        (Warp_Data.deniar != '' && Warp_Data.deniar !== editData.data.deniar) ||
+        (Warp_Data.beam_ends != '' &&
+          Warp_Data.beam_ends != editData.data.beam_ends) ||
+        (Warp_Data.shortage != '' &&
+          Warp_Data.shortage !== editData.data.shortage) ||
+        (Warp_Data.yarn_rate != '' &&
+          Warp_Data.yarn_rate !== editData.data.yarn_rate) ||
+        (Warp_Data.company.name != '' &&
+          Warp_Data.company.name !== editData.data.company.name) ||
+        (Warp_Data.yarn.name != '' &&
+          Warp_Data.yarn.name !== editData.data.yarn.name) ||
+        Warp_Data.tpm !== editData.data.tpm
+      ) {
         console.log('Warp_Data disable is false');
         setIsDisable(false);
       } else {
         console.log('Warp_Data disable is true');
         setIsDisable(true);
       }
-    }else{
+    } else {
       if (
         Warp_Data.deniar != '' &&
         Warp_Data.beam_ends != '' &&
